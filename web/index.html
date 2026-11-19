@@ -541,7 +541,6 @@
     <div class="ops-title">快捷操作</div>
     <button class="btn btn-primary" id="loadBtn" style="width:100%;">加载报名表</button>
     <button class="btn btn-ghost" id="fetchBtn" disabled style="width:100%;">加载 OIerDb 数据库</button>
-    <button class="btn btn-ghost" id="updateDbBtn" style="width:100%; display:none;" title="从 OIerDb 官方接口重新下载获奖数据">联网更新数据库</button>
     <button class="btn btn-ghost" id="matchBtn" disabled style="width:100%;">筛选匹配</button>
     <button class="btn btn-success" id="exportBtn" disabled style="width:100%;">导出结果</button>
     <div style="height:1px;background:var(--border);margin:4px 0;"></div>
@@ -1686,50 +1685,6 @@ async function loadRegisterFile(file) {
 $('loadBtn').addEventListener('click', () => $('registerFile').click());
 
 $('fetchBtn').addEventListener('click', loadOierdb);
-
-// ---------- 本地模式：联网更新 OIerDb 数据 ----------
-// 页面本身是纯静态的；只有用 `python run.py` 启动时，本地服务才会响应这些接口。
-async function probeLocalServer() {
-  try {
-    const r = await fetch('api/ping', { cache: 'no-store' });
-    if (!r.ok) return;
-    const j = await r.json();
-    if (j && j.ok && j.local) {
-      $('updateDbBtn').style.display = '';
-      $('updateDbBtn').title = `本地服务 v${j.version}：从 OIerDb 官方接口重新下载获奖数据`;
-    }
-  } catch (e) { /* 纯静态部署下没有本地服务，忽略 */ }
-}
-
-$('updateDbBtn').addEventListener('click', async () => {
-  const btn = $('updateDbBtn');
-  if (!confirm('将从 OIerDb 官方接口重新下载获奖数据（约 13MB），并覆盖页面内置的快照。\n\n确定继续？')) return;
-  btn.disabled = true;
-  btn.textContent = '更新中…';
-  try {
-    const r = await fetch('api/update_oierdb', { method: 'POST' });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    let st = null;
-    for (;;) {
-      await new Promise(res => setTimeout(res, 1200));
-      const s = await fetch('api/update_status', { cache: 'no-store' });
-      st = await s.json();
-      btn.textContent = '更新中… ' + (st.message || '');
-      if (st.state === 'done' || st.state === 'error') break;
-    }
-    if (st.state === 'error') throw new Error(st.message || '未知错误');
-    toast(st.message || '数据已更新');
-    oierdbLoaded = false;
-    await loadOierdb();
-  } catch (e) {
-    toast('更新失败：' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '联网更新数据库';
-  }
-});
-
-probeLocalServer();
 
 $('matchBtn').addEventListener('click', async () => {
   if (!registerLoaded) { toast('请先加载报名表'); return; }

@@ -4,7 +4,7 @@
 
 v2 结构说明：
   - 前端只有一份页面（web/index.html），核验、导出、台签/准考证/签到表全部在浏览器内完成；
-  - Python 侧只保留「联网更新 OIerDb 数据」的能力（src/oierdb_fetcher.py + src/local_server.py）；
+  - Python 侧只做两件事：本地静态托管（src/local_server.py）与抓取获奖数据（src/oierdb_fetcher.py）；
   - v1 的服务端实现（服务端读表/匹配/导出）已归档在 legacy/，仅作参考。
 """
 import os

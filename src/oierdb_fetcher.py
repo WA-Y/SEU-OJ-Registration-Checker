@@ -420,8 +420,10 @@ def export_web_data(people=None, progress=None):
 
 
 if __name__ == "__main__":
-    idx, total = fetch_and_parse(force=True)
-    print(f"共解析 {total} 条获奖记录，涉及 {len(idx)} 个不同姓名")
-    # 打印几个样例
-    for name in list(idx.keys())[:5]:
-        print(name, idx[name])
+    # 手动更新数据：下载 → 解析 → 重建前端快照（覆盖 web/data/*.json.gz）
+    print("[1/2] 从 OIerDb 官方接口下载获奖数据（约 13MB）…")
+    people = download_and_parse(progress=lambda m: print("     ", m, flush=True))
+    print(f"[2/2] 正在生成前端快照…")
+    names, uids = export_web_data(people, progress=lambda m: print("     ", m, flush=True))
+    print(f"完成：{names} 个姓名 / {uids} 位选手")
+    print("快照已写入 web/data/oierdb_index.json.gz、web/data/oierdb_detail.json.gz")

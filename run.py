@@ -8,7 +8,9 @@
 功能：
   1. 启动本地服务（默认 http://127.0.0.1:8765），托管 web/ 页面
   2. 自动打开浏览器
-  3. 页面内点「联网更新数据库」时，由本地服务抓取 OIerDb 最新获奖数据
+
+页面是纯前端应用，所有功能在浏览器里完成；如需刷新获奖数据库，
+另开一个终端运行 `python src/oierdb_fetcher.py`。
 
 依赖：仅 Python 标准库，无需安装任何第三方包。
 """
@@ -45,7 +47,7 @@ def main():
     print("\n========== SEU-OJ 报名核验 v2 ==========")
     print(f"请在浏览器中访问：http://127.0.0.1:{PORT}")
     print("页面功能：报名表核验 / 导出结果 / 台签 / 准考证 / 签到表")
-    print("数据更新：页面内点「联网更新数据库」即可拉取 OIerDb 最新名单")
+    print("数据更新：需要时运行 python src/oierdb_fetcher.py 重新抓取获奖名单")
     print("按 Ctrl+C 或关闭此窗口退出。\n")
     try:
         srv.serve_forever()
