@@ -103,4 +103,6 @@ python run.py
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request。参与前请先阅读上面的使用说明，确保理解筛选逻辑。
+欢迎提交 Issue 和 Pull Request！详细规范请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+> 隐私提醒：请勿在 Issue / PR 中附带真实报名数据（含学号、手机号、QQ 等个人信息）。
