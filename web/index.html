@@ -81,6 +81,26 @@
   .menu-item.passed .dot { background: var(--success); }
   .menu-item.draft .dot { background: var(--danger); }
 
+  /* 生成工具：与名单功能同级的独立入口 */
+  .menu-label.tool-label {
+    margin-top: 8px; padding-top: 12px;
+    border-top: 1px solid var(--border); color: var(--text);
+    font-weight: 600; font-size: 11px;
+  }
+  .menu-item.tool-item {
+    font-weight: 600; padding: 11px 12px;
+    border: 1px solid #dbe3ff; background: #f5f8ff;
+  }
+  .menu-item.tool-item:hover { background: #e8f0fe; border-color: var(--primary); }
+  .menu-item.tool-item .tool-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .menu-item.tool-item .tool-arrow {
+    margin-left: auto; color: var(--primary); font-size: 15px; font-weight: 700;
+  }
+
   .sidebar .ops {
     padding: 14px 16px; border-top: 1px solid var(--border);
     display: flex; flex-direction: column; gap: 8px;
@@ -342,6 +362,133 @@
   }
   .info-value { color: var(--text); font-weight: 500; }
 
+  /* 台签生成 */
+  .badge-modal { width: 640px; max-width: 94vw; }
+  .badge-body { padding: 16px 20px 20px; max-height: 72vh; overflow-y: auto; }
+  .badge-step { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .badge-step:last-of-type { border-bottom: none; }
+  .badge-step-title { font-weight: 600; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .step-no { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; font-size:12px; }
+  .badge-file-row { display: flex; gap: 8px; align-items: center; }
+  .badge-file-row input[type=text] { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .badge-hint { color: var(--text-sub); font-size: 12px; margin-top: 8px; line-height: 1.5; }
+  .badge-check { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 10px; cursor: pointer; }
+  .badge-options { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+  .badge-options select, .badge-options input[type=text] { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .badge-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .badge-report { margin-top: 16px; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); font-size: 13px; line-height: 1.7; }
+  .badge-report .rpt-ok { color: var(--success); font-weight: 600; }
+  .badge-report .rpt-warn { color: var(--warn); font-weight: 600; }
+  .badge-report .rpt-err { color: var(--danger); font-weight: 600; }
+  .badge-report ul { margin: 6px 0 0 18px; }
+  .badge-report li { margin: 2px 0; }
+  .badge-report .rpt-preview { margin-top: 8px; font-family: monospace; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid var(--border); white-space: pre-wrap; word-break: break-all; }
+
+  /* 准考证生成 */
+  .ticket-modal { width: 680px; max-width: 95vw; }
+  .ticket-body { padding: 16px 20px 20px; max-height: 72vh; overflow-y: auto; }
+  .ticket-step { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .ticket-step:last-of-type { border-bottom: none; }
+  .ticket-step-title { font-weight: 600; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .ticket-file-row { display: flex; gap: 8px; align-items: center; }
+  .ticket-file-row input[type=text] { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .ticket-hint { color: var(--text-sub); font-size: 12px; margin-top: 8px; line-height: 1.5; }
+  .ticket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+  .ticket-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .ticket-field input { padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .ticket-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+  /* ===== 准考证打印版式（A4 横向 2×2，按 PDF 坐标换算为 mm）===== */
+  #ticketPrintArea { display: none; }
+  .tk-page {
+    width: 297mm; height: 210mm; position: relative;
+    page-break-after: always; break-after: page; background: #fff; overflow: hidden;
+  }
+  .tk-grid {
+    position: absolute; left: 9mm; top: 12mm;
+    display: grid; grid-template-columns: 130.5mm 130.5mm;
+    column-gap: 17.9mm; row-gap: 24.3mm;
+  }
+  .tk-card {
+    width: 130.5mm; height: 80.7mm;
+    border: 0.26mm solid #000; box-sizing: border-box;
+    font-family: "SimHei", "黑体", sans-serif; color: #000;
+    position: relative; background: #fff; overflow: hidden;
+  }
+  .tk-logo {
+    position: absolute; left: 6.3mm; top: 6.3mm;
+    width: 15mm; height: 15mm; object-fit: contain;
+  }
+  .tk-title {
+    position: absolute; left: 22.5mm; top: 6.8mm; right: 3mm;
+    text-align: center; font-size: 4.4mm; line-height: 7mm; font-weight: normal;
+  }
+  /* 横线：样例中在 logo/标题下方、姓名上方（卡片高度31%处） */
+  .tk-divider {
+    position: absolute; left: 1.5mm; right: 1.5mm; top: 25.1mm;
+    height: 0; border-top: 0.3mm solid #000;
+  }
+  .tk-col { position: absolute; font-size: 4.2mm; line-height: 9mm; }
+  .tk-col-left { left: 11.3mm; top: 29.5mm; }
+  .tk-col-right { left: 68mm; top: 38.6mm; }
+  .tk-line { white-space: nowrap; height: 9mm; }
+  .tk-label { font-family: "SimHei", "黑体", sans-serif; }
+  .tk-val { font-family: "Courier New", monospace; }
+  .tk-foot {
+    position: absolute; left: 8.2mm; right: 8.2mm; bottom: 2mm;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 2.8mm; font-family: "SimHei", "黑体", sans-serif;
+  }
+
+  /* ===== 签到表版式（A4 纵向，左右两栏）===== */
+  #signPrintArea { display: none; }
+  .sg-modal { width: 560px; max-width: 94vw; }
+  .sg-body { padding: 16px 20px 20px; max-height: 72vh; overflow-y: auto; }
+  .sg-step { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .sg-step:last-of-type { border-bottom: none; }
+  .sg-step-title { font-weight: 600; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .sg-file-row { display: flex; gap: 8px; align-items: center; }
+  .sg-file-row input[type=text] { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .sg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+  .sg-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .sg-field input { padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .sg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+  .sg-page {
+    width: 210mm; height: 297mm; background: #fff;
+    box-sizing: border-box; padding: 10mm 10mm 8mm;
+    page-break-after: always; break-after: page;
+    font-family: "SimHei", "黑体", sans-serif; color: #000;
+  }
+  .sg-title { text-align: center; font-size: 6mm; font-weight: bold; margin-bottom: 2mm; }
+  .sg-subtitle { text-align: center; font-size: 3mm; color: #333; margin-bottom: 4mm; }
+  .sg-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .sg-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .sg-table th, .sg-table td {
+    border: 0.25mm solid #000; height: 12.5mm;
+    font-size: 3.4mm; padding: 0 1mm; box-sizing: border-box;
+    text-align: center; vertical-align: middle;
+  }
+  /* 列宽：序号窄、签名宽 */
+  .sg-table th.sg-no, .sg-table td.sg-no { width: 10%; }
+  .sg-table th.sg-name, .sg-table td.sg-name { width: 22%; }
+  .sg-table th.sg-sid, .sg-table td.sg-sid { width: 28%; }
+  .sg-table th.sg-sign, .sg-table td.sg-sign { width: 40%; }
+  .sg-table th { font-weight: bold; height: 11mm; font-size: 3.6mm; }
+  .sg-table td.sg-sign, .sg-table td.sg-name, .sg-table td.sg-sid { text-align: left; padding-left: 1.5mm; }
+
+  @media print {
+    @page { size: A4 landscape; margin: 0; }
+    html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+    body * { visibility: hidden !important; }
+    #ticketPrintArea, #ticketPrintArea * { visibility: visible !important; }
+    #signPrintArea, #signPrintArea * { visibility: visible !important; }
+    #ticketPrintArea { display: block !important; position: absolute; left: 0; top: 0; }
+    #signPrintArea { display: block !important; position: absolute; left: 0; top: 0; }
+    .tk-page, .sg-page { page-break-after: always; break-after: page; }
+    .tk-page:last-child, .sg-page:last-child { page-break-after: auto; break-after: auto; }
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
 
 </style>
 </head>
@@ -373,11 +520,28 @@
       <span>草稿箱（已取消）</span>
       <span class="badge" id="draftCount">0</span>
     </div>
+    <div class="menu-label tool-label">生成工具</div>
+    <div class="menu-item tool-item" id="menuBadge">
+      <span class="tool-icon">🏷</span>
+      <span>台签生成</span>
+      <span class="tool-arrow">›</span>
+    </div>
+    <div class="menu-item tool-item" id="menuTicket">
+      <span class="tool-icon">🎫</span>
+      <span>准考证生成</span>
+      <span class="tool-arrow">›</span>
+    </div>
+    <div class="menu-item tool-item" id="menuSign">
+      <span class="tool-icon">📝</span>
+      <span>签到表生成</span>
+      <span class="tool-arrow">›</span>
+    </div>
   </nav>
   <div class="ops">
     <div class="ops-title">快捷操作</div>
     <button class="btn btn-primary" id="loadBtn" style="width:100%;">加载报名表</button>
-    <button class="btn btn-ghost" id="fetchBtn" disabled style="width:100%;">爬取 OIerDb 数据</button>
+    <button class="btn btn-ghost" id="fetchBtn" disabled style="width:100%;">加载 OIerDb 数据库</button>
+    <button class="btn btn-ghost" id="updateDbBtn" style="width:100%; display:none;" title="从 OIerDb 官方接口重新下载获奖数据">联网更新数据库</button>
     <button class="btn btn-ghost" id="matchBtn" disabled style="width:100%;">筛选匹配</button>
     <button class="btn btn-success" id="exportBtn" disabled style="width:100%;">导出结果</button>
     <div style="height:1px;background:var(--border);margin:4px 0;"></div>
@@ -394,8 +558,9 @@
     <button class="btn btn-ghost btn-sm" id="setYearBtn">确定</button>
   </div>
   <div class="path-input">
-    <input type="text" id="registerPath" placeholder="报名表路径（点「浏览」自动选择，或粘贴完整路径）">
-    <button class="btn btn-ghost" id="browseBtn">浏览…</button>
+    <input type="file" id="registerFile" accept=".xlsx,.xls" style="display:none;">
+    <input type="text" id="registerPath" placeholder="选择报名表 Excel 文件…" readonly>
+    <button class="btn btn-ghost" id="browseBtn">选择文件…</button>
   </div>
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="搜索姓名 / 学号…">
@@ -403,23 +568,6 @@
   </div>
   <div style="flex:1"></div>
 </header>
-
-<div class="modal-mask hidden" id="browseModal">
-  <div class="modal">
-    <h3>选择报名表</h3>
-    <p style="color:var(--text-sub);font-size:12px;margin-bottom:8px;">
-      以下是从 data 目录和「下载」文件夹自动发现的 Excel 文件（按时间倒序）：
-    </p>
-    <div id="browseList" style="max-height:320px;overflow-y:auto;"></div>
-    <p style="color:var(--text-sub);font-size:12px;margin-top:8px;">
-      没找到？请把报名表文件放到程序目录下的 <b>data</b> 文件夹里，再点「重新扫描」。
-    </p>
-    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-ghost" id="browseRescan">重新扫描</button>
-      <button class="btn btn-ghost" id="browseCancel">关闭</button>
-    </div>
-  </div>
-</div>
 
 <div class="main single">
   <div class="col" id="leftCol">
@@ -492,58 +640,720 @@
   </div>
 </div>
 
+<!-- 台签生成 -->
+<div class="modal-mask hidden" id="badgeModal">
+  <div class="modal badge-modal">
+    <div class="detail-head">
+      <div>
+        <h3>🏷 台签批量生成</h3>
+        <div class="meta">按台签样例版式，为每位参赛选手生成可打印台签</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="badgeClose">关闭</button>
+    </div>
+    <div class="badge-body">
+      <div class="badge-step">
+        <div class="badge-step-title"><span class="step-no">1</span> 报名人员名单</div>
+        <div class="badge-file-row">
+          <input type="file" id="badgeRosterFile" accept=".xlsx,.xls" style="display:none;">
+          <input type="text" id="badgeRosterPath" placeholder="选择报名名单 Excel（含姓名等列）" readonly>
+          <button class="btn btn-ghost btn-sm" id="badgeRosterBrowse">选择文件…</button>
+        </div>
+        <div class="badge-hint">上传含「姓名」列的 Excel 报名名单（本地文件）。</div>
+      </div>
+      <div class="badge-step">
+        <div class="badge-step-title"><span class="step-no">2</span> 账号密码表</div>
+        <div class="badge-file-row">
+          <input type="file" id="badgeAccountFile" accept=".xlsx,.xls" style="display:none;">
+          <input type="text" id="badgeAccountPath" placeholder="选择账号密码 Excel（含账号/密码/准入码）" readonly>
+          <button class="btn btn-ghost btn-sm" id="badgeAccountBrowse">选择文件…</button>
+        </div>
+        <div class="badge-hint">自动识别表头：姓名、账号、密码、准入码（兼容常见别名）。</div>
+      </div>
+      <div class="badge-step">
+        <div class="badge-step-title"><span class="step-no">3</span> 生成设置</div>
+        <div class="badge-options">
+          <label class="badge-check" style="flex-basis:100%;">标题第一行（上行）：
+            <input type="text" id="badgeTitle1" value="第十三届短码竞赛" placeholder="留空则不显示该行" style="flex:1;">
+          </label>
+          <label class="badge-check" style="flex-basis:100%;">标题第二行（下行）：
+            <input type="text" id="badgeTitle2" value="SEU计软智科协" placeholder="留空则不显示该行" style="flex:1;">
+          </label>
+          <label class="badge-check">输出方式：
+            <select id="badgeOutputMode">
+              <option value="merged">合并为一个 docx（推荐，便于批量打印）</option>
+              <option value="single">每人单独一个 docx（打包为 zip）</option>
+            </select>
+          </label>
+          <label class="badge-check">文件名前缀：
+            <input type="text" id="badgeNamePrefix" value="台签_四牌楼" style="width:150px;">
+          </label>
+        </div>
+      </div>
+      <div class="badge-actions">
+        <button class="btn btn-ghost" id="badgePreviewBtn">检查匹配</button>
+        <button class="btn btn-primary" id="badgeGenerateBtn" disabled>生成台签 docx</button>
+      </div>
+      <div id="badgeReport" class="badge-report hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 准考证生成 -->
+<div class="modal-mask hidden" id="ticketModal">
+  <div class="modal ticket-modal">
+    <div class="detail-head">
+      <div>
+        <h3>🎫 准考证批量生成</h3>
+        <div class="meta">按样例版式生成，一键下载 PDF</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="ticketClose">关闭</button>
+    </div>
+    <div class="ticket-body">
+      <div class="ticket-step">
+        <div class="ticket-step-title"><span class="step-no">1</span> 报名名单</div>
+        <div class="ticket-file-row">
+          <input type="file" id="ticketRosterFile" accept=".xlsx,.xls" style="display:none;">
+          <input type="text" id="ticketRosterPath" placeholder="选择报名名单 Excel" readonly>
+          <button class="btn btn-ghost btn-sm" id="ticketRosterBrowse">选择文件…</button>
+        </div>
+        <div class="ticket-hint">上传含「姓名、年级、校区/组别」列的 Excel 报名名单（本地文件），用于填写准考证。</div>
+      </div>
+      <div class="ticket-step">
+        <div class="ticket-step-title"><span class="step-no">2</span> 账号密码表</div>
+        <div class="ticket-file-row">
+          <input type="file" id="ticketAccountFile" accept=".xlsx,.xls" style="display:none;">
+          <input type="text" id="ticketAccountPath" placeholder="选择账号密码 Excel（含账号/密码/准入码）" readonly>
+          <button class="btn btn-ghost btn-sm" id="ticketAccountBrowse">选择文件…</button>
+        </div>
+        <div class="ticket-hint">上传含「姓名/账号/密码/准入码」列的本地 Excel，自动识别表头。</div>
+      </div>
+      <div class="ticket-step">
+        <div class="ticket-step-title"><span class="step-no">3</span> 准考证信息</div>
+        <div class="ticket-grid">
+          <label class="ticket-field">比赛标题
+            <input type="text" id="ticketTitle" value="第七届「帆软杯」东南大学大学生程序设计竞赛">
+          </label>
+          <label class="ticket-field">组别标签
+            <input type="text" id="ticketGroupLabel" value="新手组">
+          </label>
+          <label class="ticket-field">参赛地点
+            <input type="text" id="ticketLocation" value="九龙湖校区">
+          </label>
+          <label class="ticket-field">入学年基准
+            <input type="number" id="ticketBaseYear" value="2026">
+          </label>
+          <label class="ticket-field">纪律提示
+            <input type="text" id="ticketNotice" value="请严格遵守比赛规则与考试纪律">
+          </label>
+          <label class="ticket-field">落款
+            <input type="text" id="ticketSign" value="东南大学计软智科协">
+          </label>
+        </div>
+        <div class="ticket-hint">年级按「入学年基准 + 年级」推算，如 2026 + 大一 → 大一（26级）；参赛地点/组别可留空表示跟随名单数据。</div>
+      </div>
+      <div class="ticket-actions">
+        <button class="btn btn-ghost" id="ticketPreviewBtn">预览 / 检查匹配</button>
+        <button class="btn btn-primary" id="ticketGenerateBtn" disabled>生成准考证</button>
+        <button class="btn btn-success" id="ticketPrintBtn" disabled>⬇ 下载 PDF</button>
+      </div>
+      <div id="ticketReport" class="badge-report hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 准考证打印区（屏幕隐藏，打印时显示） -->
+<div id="ticketPrintArea"></div>
+
+<!-- 签到表生成 -->
+<div class="modal-mask hidden" id="signModal">
+  <div class="modal sg-modal">
+    <div class="detail-head">
+      <div>
+        <h3>📝 签到表批量生成</h3>
+        <div class="meta">A4 纵向，一页左右两栏，含序号/姓名/学号/签名格</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="signClose">关闭</button>
+    </div>
+    <div class="sg-body">
+      <div class="sg-step">
+        <div class="sg-step-title"><span class="step-no">1</span> 报名名单</div>
+        <div class="sg-file-row">
+          <input type="file" id="signRosterFile" accept=".xlsx,.xls" style="display:none;">
+          <input type="text" id="signRosterPath" placeholder="选择报名名单 Excel（含姓名/学号）" readonly>
+          <button class="btn btn-ghost btn-sm" id="signRosterBrowse">选择文件…</button>
+        </div>
+        <div class="ticket-hint">上传含「姓名」「学号」列的 Excel 报名名单（本地文件），自动识别；序号按名单顺序生成。</div>
+      </div>
+      <div class="sg-step">
+        <div class="sg-step-title"><span class="step-no">2</span> 表格设置</div>
+        <div class="sg-grid">
+          <label class="sg-field">表格标题
+            <input type="text" id="signTitle" value="签到表">
+          </label>
+          <label class="sg-field">副标题
+            <input type="text" id="signSubtitle" value="第七届「帆软杯」东南大学大学生程序设计竞赛">
+          </label>
+        </div>
+        <div class="ticket-hint">固定每栏 20 行、每页左右两栏共 40 人，表格铺满整张 A4。有多少人生成多少格，不预留空格。</div>
+      </div>
+      <div class="sg-actions">
+        <button class="btn btn-ghost" id="signPreviewBtn">预览 / 检查</button>
+        <button class="btn btn-primary" id="signGenerateBtn" disabled>生成签到表</button>
+        <button class="btn btn-success" id="signDownloadBtn" disabled>⬇ 下载 PDF</button>
+      </div>
+      <div id="signReport" class="badge-report hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 签到表打印区（屏幕隐藏） -->
+<div id="signPrintArea"></div>
+
 <div class="toast" id="toast"></div>
 
+<script src="xlsx.full.min.js"></script>
+<script src="jszip.min.js"></script>
+<script src="html2canvas.min.js"></script>
+<script src="jspdf.umd.min.js"></script>
 <script>
+// ============ 纯前端版：东南大学 OJ 比赛报名校对核验 ============
+// 所有逻辑在浏览器本地运行，无需后端服务器。数据保存在浏览器 localStorage。
+
 const $ = (id) => document.getElementById(id);
-let state = { left: [], right: [], rejected: [] };
+
+// ---------- 全局状态 ----------
+let state = { left: [], right: [], rejected: [] };  // 前端展示用
+let allPeople = [];        // 所有报名人（含匹配结果）
+let oierdbIndex = null;    // name -> [{uid, grade}]
+let oierdbDetail = null;   // uid -> records
+let registerLoaded = false;
+let oierdbLoaded = false;
+let matched = false;       // 是否已执行筛选
+let historyStack = [];     // 回退栈
+let currentYear = 2026;
 let selectedKey = null;
 let pendingRejectKey = null;
+let searchKeyword = '';
+let groupConfirmPerson = null;
 
+const GRADE_TOLERANCE = 1;
+const MIDDLE_TO_UNIVERSITY_OFFSET = 6;
+const GROUP_FRESHMAN = '大一组';
+const GROUP_SOPHOMORE = '大二组';
+const GROUP_PROFESSIONAL = '专业组';
+const CAMPUS_SIPAILOU = '四牌楼';
+const CAMPUS_JIULONGHU = '九龙湖';
+
+// ---------- 持久化：localStorage ----------
+const LS_KEY = 'seu_oj_checker_state_v1';
+
+// 把当前工作状态打包成一个对象
+function buildStateData() {
+  const data = {
+    year: currentYear,
+    people: allPeople,
+    statuses: {},  // key -> {status, passed_groups}
+    history: historyStack,
+  };
+  allPeople.forEach(p => {
+    data.statuses[p.key] = { status: p.status, passed_groups: p.passed_groups || [] };
+  });
+  return data;
+}
+
+// 从状态对象恢复工作状态
+function applyStateData(data) {
+  if (!data || !data.people || !Array.isArray(data.people)) return false;
+  allPeople = data.people;
+  currentYear = data.year || 2026;
+  historyStack = data.history || [];
+  const statuses = data.statuses || {};
+  allPeople.forEach(p => {
+    const s = statuses[p.key];
+    if (s) { p.status = s.status; p.passed_groups = s.passed_groups || []; }
+  });
+  rebuildState();
+  return true;
+}
+
+// 保存到 localStorage
+function saveState() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(buildStateData())); } catch (e) { /* 静默 */ }
+}
+
+// 从 localStorage 加载
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    return applyStateData(JSON.parse(raw));
+  } catch (e) { /* 忽略损坏数据 */ }
+  return false;
+}
+
+// 清除 localStorage
+function clearState() {
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  allPeople = [];
+  historyStack = [];
+  registerLoaded = false;
+  matched = false;
+  rebuildState();
+}
+
+// ---------- 工具函数 ----------
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-async function api(path, body) {
-  const opt = { method: body ? 'POST' : 'GET', headers: {} };
-  if (body) {
-    opt.headers['Content-Type'] = 'application/json';
-    opt.body = JSON.stringify(body);
-  }
-  const res = await fetch(path, opt);
-  const data = await res.json();
-  if (!res.ok || data.error) {
-    throw new Error(data.error || '请求失败');
-  }
-  return data;
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
 }
 
+function personKey(p) {
+  if (p.student_id) return `sid:${p.student_id}`;
+  if (p.card_id) return `card:${p.name}:${p.card_id}`;
+  if (p.qq) return `qq:${p.name}:${p.qq}`;
+  return `row:${p.name}:${p.row}`;
+}
+
+// ---------- 匹配逻辑（翻译自 matcher.py） ----------
+function middleToUniversityYear(middleYear) {
+  return middleYear + MIDDLE_TO_UNIVERSITY_OFFSET;
+}
+
+function isNewcomerGroup(groups) {
+  return groups.includes(GROUP_FRESHMAN) || groups.includes(GROUP_SOPHOMORE);
+}
+
+function isProfessionalGroup(groups) {
+  return groups.includes(GROUP_PROFESSIONAL);
+}
+
+function matchPeople(people) {
+  // 为每个报名人计算 matched / suspect / oier_candidates
+  return people.map(p => {
+    p.matched = false;
+    p.suspect = false;
+    p.oier_candidates = [];
+    p.oier_grades = [];
+    p.oier_univ_years = [];
+
+    const name = p.name || '';
+    if (!oierdbIndex || !oierdbIndex[name]) {
+      return p;
+    }
+    const candidates = oierdbIndex[name];
+    p.matched = true;
+    const actual = p.grade_year;
+
+    let matchCount = 0;
+    const candList = candidates.map(c => {
+      const grade = c.grade;
+      const univ_year = middleToUniversityYear(grade);
+      let is_match = false;
+      if (actual != null && Math.abs(univ_year - actual) <= GRADE_TOLERANCE) {
+        is_match = true;
+        matchCount++;
+      }
+      return { uid: c.uid, grade, univ_year, is_match };
+    });
+    p.oier_candidates = candList;
+    p.oier_grades = [...new Set(candList.map(c => c.grade))].sort();
+    p.oier_univ_years = [...new Set(candList.map(c => c.univ_year))].sort();
+    p.suspect = (actual != null) && (matchCount > 0);
+    return p;
+  });
+}
+
+// ---------- 默认状态分配（翻译自 server.py _set_default_statuses） ----------
+function assignDefaultStatuses(people) {
+  people.forEach(p => {
+    if (p.status) return;  // 已有状态
+    if (isProfessionalGroup(p.groups) && !isNewcomerGroup(p.groups)) {
+      p.status = 'auto_pass';
+    } else if (isNewcomerGroup(p.groups)) {
+      p.status = p.suspect ? 'pending' : 'auto_pass';
+    } else {
+      p.status = 'pending';
+    }
+    p.passed_groups = p.passed_groups || [];
+  });
+}
+
+// ---------- 重建 state（left/right/rejected 三栏） ----------
+function rebuildState() {
+  state.left = allPeople.filter(p => p.status === 'pending');
+  state.right = allPeople.filter(p => p.status === 'confirmed' || p.status === 'auto_pass');
+  state.rejected = allPeople.filter(p => p.status === 'rejected');
+}
+
+// ---------- 报名表读取（翻译自 excel_reader.py，用 SheetJS） ----------
+const HEADER_PATTERNS = [
+  ['name', ['姓名', '名字']],
+  ['student_id', ['学号']],
+  ['nickname', ['花名']],
+  ['card_id', ['一卡通']],
+  ['phone', ['手机', '电话']],
+  ['qq', ['qq', 'QQ', 'Q Q']],
+  ['grade', ['年级']],
+  ['group', ['组别']],
+  ['campus', ['校区', '参赛地点', '地点', '赛点']],
+];
+
+const GRADE_OFFSET = { '大一': 0, '大二': 1, '大三': 2, '大四': 3, '研一': 4, '研二': 5, '研三': 6, '博士': 4 };
+
+function normalizeHeader(text) {
+  if (text == null) return '';
+  let s = String(text).trim();
+  s = s.replace(/[（(].*?[)）]/g, '');
+  s = s.replace(/请选择|请填写|请输入|自动|必填|已删除/g, '');
+  return s.trim();
+}
+
+function matchField(header) {
+  const norm = normalizeHeader(header);
+  if (!norm) return null;
+  for (const [field, keywords] of HEADER_PATTERNS) {
+    for (const kw of keywords) {
+      if (norm.toLowerCase().includes(kw.toLowerCase())) return field;
+    }
+  }
+  return null;
+}
+
+function cellStr(value) {
+  if (value == null) return '';
+  if (typeof value === 'number' && Number.isInteger(value)) return String(value);
+  return String(value).trim();
+}
+
+function parseGrade(gradeStr, currentYear) {
+  const s = cellStr(gradeStr);
+  if (!s) return ['', null];
+  let gradeName = '';
+  const m = s.match(/(大一|大二|大三|大四|研一|研二|研三|博士)/);
+  if (m) gradeName = m[1];
+  let year = null;
+  const m2 = s.match(/(\d{2,4})\s*级/);
+  if (m2) {
+    let y = parseInt(m2[1], 10);
+    year = y < 100 ? 2000 + y : y;
+  }
+  if (year == null && gradeName && currentYear) {
+    const off = GRADE_OFFSET[gradeName];
+    if (off != null) year = currentYear - off;
+  }
+  return [gradeName, year];
+}
+
+function parseGroups(groupStr) {
+  const s = cellStr(groupStr);
+  if (!s) return [];
+  const parts = s.split(/[,，、;；/\s]+/);
+  const groups = [];
+  for (let p of parts) {
+    p = p.trim();
+    if (GROUP_FRESHMAN.includes(p) || p.includes(GROUP_FRESHMAN)) groups.push(GROUP_FRESHMAN);
+    else if (GROUP_SOPHOMORE.includes(p) || p.includes(GROUP_SOPHOMORE)) groups.push(GROUP_SOPHOMORE);
+    else if (GROUP_PROFESSIONAL.includes(p) || p.includes(GROUP_PROFESSIONAL)) groups.push(GROUP_PROFESSIONAL);
+  }
+  return [...new Set(groups)];
+}
+
+function parseCampus(campusStr) {
+  const s = cellStr(campusStr);
+  if (!s) return '';
+  if (s.includes(CAMPUS_SIPAILOU)) return CAMPUS_SIPAILOU;
+  if (s.includes(CAMPUS_JIULONGHU)) return CAMPUS_JIULONGHU;
+  return s;
+}
+
+function readRegisterFromWorkbook(wb, currentYear) {
+  // 自动选择最佳 sheet（含"姓名+学号"表头且数据行最多）
+  let bestSheet = null, bestScore = -1, bestRows = null;
+  const sheetNames = wb.SheetNames;
+  for (const name of sheetNames) {
+    const ws = wb.Sheets[name];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    if (!rows.length) continue;
+    let headerIdx = -1, headerFields = [];
+    for (let i = 0; i < Math.min(20, rows.length); i++) {
+      const fields = rows[i].map(matchField);
+      if (fields.includes('name') && (fields.includes('student_id') || fields.includes('card_id'))) {
+        headerIdx = i;
+        headerFields = fields;
+        break;
+      }
+    }
+    if (headerIdx < 0) continue;
+    const nameCol = headerFields.indexOf('name');
+    let dataRows = 0;
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      if (nameCol >= 0 && nameCol < rows[i].length && cellStr(rows[i][nameCol])) dataRows++;
+    }
+    const score = dataRows * 1000 + headerFields.filter(Boolean).length;
+    if (score > bestScore) {
+      bestScore = score;
+      bestSheet = ws;
+      bestRows = rows;
+    }
+  }
+  if (!bestSheet) return [];
+
+  const rows = bestRows;
+  // 识别表头
+  let headerRowIdx = -1, colMap = {}, colFields = [];
+  for (let i = 0; i < Math.min(20, rows.length); i++) {
+    const fields = rows[i].map(matchField);
+    if (fields.includes('name') && (fields.includes('student_id') || fields.includes('card_id'))) {
+      headerRowIdx = i;
+      colFields = fields;
+      for (let col = 0; col < fields.length; col++) {
+        if (fields[col]) {
+          if (!colMap[fields[col]]) colMap[fields[col]] = [];
+          colMap[fields[col]].push(col);
+        }
+      }
+      break;
+    }
+  }
+  if (headerRowIdx < 0) {
+    headerRowIdx = 0;
+    colFields = rows[0].map(matchField);
+    for (let col = 0; col < colFields.length; col++) {
+      if (colFields[col]) {
+        if (!colMap[colFields[col]]) colMap[colFields[col]] = [];
+        colMap[colFields[col]].push(col);
+      }
+    }
+  }
+
+  const getCol = (row, field) => {
+    const cols = colMap[field] || [];
+    for (const c of cols) {
+      if (c < row.length) {
+        const v = cellStr(row[c]);
+        if (v) return v;
+      }
+    }
+    return '';
+  };
+  const getGroupCols = (row) => {
+    const groups = [];
+    for (const c of (colMap['group'] || [])) {
+      if (c < row.length) groups.push(...parseGroups(row[c]));
+    }
+    return [...new Set(groups)];
+  };
+
+  const people = [];
+  for (let idx = headerRowIdx + 1; idx < rows.length; idx++) {
+    const row = rows[idx];
+    const name = getCol(row, 'name');
+    if (!name) continue;
+    const student_id = getCol(row, 'student_id');
+    const card_id = getCol(row, 'card_id');
+    const qq = getCol(row, 'qq');
+    const phone = getCol(row, 'phone');
+    const nickname = getCol(row, 'nickname');
+    const [grade_name, grade_year] = parseGrade(getCol(row, 'grade'), currentYear);
+    const groups = getGroupCols(row);
+    const campus = parseCampus(getCol(row, 'campus'));
+    const p = {
+      name, student_id, nickname, card_id, phone, qq,
+      grade_name, grade_year, groups, campus,
+      row: idx + 1,
+    };
+    p.key = personKey(p);
+    people.push(p);
+  }
+  return people;
+}
+
+// ---------- OIerDb 数据加载（gzip 解压） ----------
+async function loadGzipJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  // 使用 DecompressionStream 解压 gzip
+  const ds = new DecompressionStream('gzip');
+  const stream = res.body.pipeThrough(ds);
+  const buf = await new Response(stream).arrayBuffer();
+  const text = new TextDecoder('utf-8').decode(buf);
+  return JSON.parse(text);
+}
+
+async function loadOierdb() {
+  $('fetchBtn').disabled = true;
+  $('fetchBtn').textContent = '加载中（约 4MB）…';
+  try {
+    oierdbIndex = await loadGzipJson('data/oierdb_index.json.gz');
+    oierdbDetail = await loadGzipJson('data/oierdb_detail.json.gz');
+    oierdbLoaded = true;
+    const names = Object.keys(oierdbIndex).length;
+    const total = Object.keys(oierdbDetail).length;
+    toast(`数据库加载成功：${total} 条记录，${names} 个姓名`);
+    updateButtons();
+  } catch (e) {
+    toast('数据库加载失败：' + e.message);
+  } finally {
+    $('fetchBtn').textContent = '加载 OIerDb 数据库';
+    updateButtons();
+  }
+}
+
+// ---------- 详情（翻译自 renderDetail/openDetail） ----------
+function awardClass(award) {
+  if (!award) return 'award-other';
+  if (award.includes('国际金牌') || award.includes('国际')) return 'award-intl';
+  if (award === '金牌') return 'award-gold';
+  if (award === '银牌') return 'award-silver';
+  if (award === '铜牌') return 'award-bronze';
+  if (award === '一等奖') return 'award-first';
+  return 'award-other';
+}
+
+function stageLabel(schoolYear, enrollMiddle) {
+  if (enrollMiddle == null || schoolYear == null) return '';
+  const n = schoolYear - enrollMiddle + 1;
+  if (n < 1) return '小学/未入学';
+  if (n <= 3) return `初${['一','二','三'][n-1]}`;
+  if (n <= 6) return `高${['一','二','三'][n-4]}`;
+  if (n <= 10) return `大${['一','二','三','四'][n-7] || '四'}`;
+  return `大${n-6}+`;
+}
+
+function renderDetail(p) {
+  const body = $('detailBody');
+  const infoRows = [
+    ['学号', p.student_id], ['花名', p.nickname], ['一卡通', p.card_id],
+    ['手机', p.phone], ['QQ', p.qq], ['年级', p.grade_name],
+    ['组别', (p.groups || []).join('、')], ['校区', p.campus],
+  ].filter(([, v]) => v != null && String(v).trim() !== '');
+  const infoCard = `<div class="detail-info-card">
+    <div class="detail-info-name">${esc(p.name || '')}</div>
+    <div class="detail-info-grid">
+      ${infoRows.map(([k, v]) => `<div class="info-item"><span class="info-label">${k}</span><span class="info-value">${esc(v)}</span></div>`).join('')}
+    </div>
+  </div>`;
+
+  if (!p.matched || !p.oier_candidates || p.oier_candidates.length === 0) {
+    body.innerHTML = infoCard + '<div class="detail-empty">该人在 OIerDb 获奖数据库中未找到记录</div>';
+    return;
+  }
+
+  const actualYear = p.grade_year;
+  let html = infoCard;
+  if (actualYear) {
+    html += `<div class="detail-warn">
+      该报名人年级为 <b>${esc(p.grade_name || '')}（${actualYear} 级）</b>，即 ${actualYear} 年大学入学。
+      下方列出 OIerDb 中所有同名者的完整获奖轨迹，请核对<b>哪一个才是本人</b>。
+    </div>`;
+  }
+
+  const candidates = p.oier_candidates;
+  const matchedCands = candidates.filter(c => c.is_match);
+  const otherCands = candidates.filter(c => !c.is_match);
+
+  function renderEntry(c) {
+    const records = (oierdbDetail && oierdbDetail[c.uid]) || [];
+    const recRows = records.map(r => {
+      const schoolYear = r.fall_semester ? (r.year || 0) : (r.year || 0) - 1;
+      const stage = stageLabel(schoolYear, c.grade);
+      return { ...r, stage };
+    });
+    const em = c.grade, uy = c.univ_year;
+    let summary = '';
+    if (em != null && uy != null) {
+      summary = `初中 ${em} 年入学 · 高中 ${em + 3} 年入学 · 大学 ${uy} 年入学`;
+    }
+    let latest = '';
+    if (recRows.length > 0) {
+      const r = recRows[0];
+      latest = `最近获奖：${r.year ?? '—'} 年 ${r.contest_name || '—'} ${r.award || '—'}（当时${r.stage || '—'}）`;
+    }
+    const badge = c.is_match
+      ? '<span class="award-badge award-first" style="margin-left:8px;">可能本人</span>'
+      : '<span class="award-badge award-other" style="margin-left:8px;">同名非本人</span>';
+
+    let tbody = '';
+    if (recRows.length === 0) {
+      tbody = '<tr><td colspan="6" style="color:var(--text-sub);text-align:center;">无获奖记录</td></tr>';
+    } else {
+      recRows.forEach(r => {
+        const stageCls = /^高/.test(r.stage || '') ? 'style="font-weight:600;color:#c77a00;"' : '';
+        tbody += `<tr>
+          <td class="contest-name">${esc(r.contest_name || '—')}</td>
+          <td class="rec-year">${r.year ?? '—'}</td>
+          <td ${stageCls}>${esc(r.stage || '—')}</td>
+          <td><span class="award-badge ${awardClass(r.award)}">${esc(r.award || '—')}</span></td>
+          <td>${r.rank ?? '—'}</td>
+          <td>${esc(r.score || '—')}</td>
+        </tr>`;
+      });
+    }
+
+    const url = `https://oier.baoshuo.dev/oier/${esc(c.uid)}`;
+    return `<div class="detail-person" style="${c.is_match ? 'border-color:var(--primary);' : ''}">
+      <div class="detail-person-head">
+        <div>
+          <span style="font-weight:600;">${esc(p.name)}</span>${badge}
+          <div class="uid">${esc(summary)}${c.uid ? ' · UID ' + esc(c.uid) : ''}</div>
+          ${latest ? `<div class="uid" style="color:var(--text);">${esc(latest)}</div>` : ''}
+        </div>
+        <a class="detail-link" href="${url}" target="_blank" rel="noopener">在 OIerDb 官网查看 ↗</a>
+      </div>
+      <table class="rec-table">
+        <thead><tr><th>比赛</th><th>年份</th><th>当时年级</th><th>奖项</th><th>排名</th><th>分数</th></tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    </div>`;
+  }
+
+  matchedCands.forEach(c => { html += renderEntry(c); });
+  otherCands.forEach(c => { html += renderEntry(c); });
+  body.innerHTML = html;
+}
+
+function openDetail(key, name) {
+  $('detailModal').classList.remove('hidden');
+  $('detailTitle').textContent = `选手详情 · ${name}`;
+  $('detailMeta').textContent = '';
+  $('detailBody').innerHTML = '<div class="loading">加载中…</div>';
+  const p = allPeople.find(x => x.key === key);
+  if (!p) {
+    $('detailBody').innerHTML = '<div class="detail-empty">未找到该选手</div>';
+    return;
+  }
+  if (!oierdbLoaded) {
+    $('detailBody').innerHTML = '<div class="detail-empty">请先加载 OIerDb 数据库</div>';
+    return;
+  }
+  renderDetail(p);
+}
+
+// ---------- 渲染（复用原 renderPerson/render/classifyPerson） ----------
 function renderPerson(p, side) {
   const el = document.createElement('div');
   el.className = 'person-card' + (selectedKey === p.key ? ' selected' : '');
   el.dataset.key = p.key;
 
-  // 组别、校区、疑似获奖标记
   const groupTags = (p.groups || []).length
-    ? (p.groups || []).map(g => `<span class="tag tag-group">${g}</span>`).join('')
-    : '';
-  const campusTag = p.campus
-    ? `<span class="tag tag-campus">${p.campus}</span>` : '';
-  const suspectTag = (p.suspect || p.matched)
-    ? '<span class="tag tag-suspect">疑似获奖</span>' : '';
+    ? p.groups.map(g => `<span class="tag tag-group">${esc(g)}</span>`).join('') : '';
+  const campusTag = p.campus ? `<span class="tag tag-campus">${esc(p.campus)}</span>` : '';
+  const suspectTag = (p.suspect || p.matched) ? '<span class="tag tag-suspect">疑似获奖</span>' : '';
 
-  let actions = '';
-  let actionsInline = '';
+  let actions = '', actionsInline = '';
   if (side === 'left') {
-    // 待确认栏：按钮放名字右边，卡片更紧凑
-    actionsInline = `
-      <span class="name-actions">
-        <button class="btn btn-success btn-sm" data-act="confirm">确认报名成功</button>
-        <button class="btn btn-danger btn-sm" data-act="reject">取消报名资格</button>
-      </span>`;
+    actionsInline = `<span class="name-actions">
+      <button class="btn btn-success btn-sm" data-act="confirm">确认报名成功</button>
+      <button class="btn btn-danger btn-sm" data-act="reject">取消报名资格</button>
+    </span>`;
   } else if (side === 'right') {
     if (p.status === 'confirmed') {
       actions = `<div class="actions">
@@ -557,28 +1367,21 @@ function renderPerson(p, side) {
       </div>`;
     }
   } else if (side === 'draft') {
-    // 草稿箱：撤销恢复 + 永久取消
-    actionsInline = `
-      <span class="name-actions">
-        <button class="btn btn-success btn-sm" data-act="restore">撤销恢复</button>
-      </span>`;
+    actionsInline = `<span class="name-actions">
+      <button class="btn btn-success btn-sm" data-act="restore">撤销恢复</button>
+    </span>`;
   }
 
-  el.innerHTML = `
-    <div class="name-row"><span class="name">${p.name}</span>${groupTags}${campusTag}${suspectTag}${actionsInline}</div>
-    ${actions}
-  `;
+  el.innerHTML = `<div class="name-row"><span class="name">${esc(p.name)}</span>${groupTags}${campusTag}${suspectTag}${actionsInline}</div>${actions}`;
 
-  // 点击卡片进入详情界面（展示完整信息）
   el.addEventListener('click', (e) => {
-    if (e.target.dataset.act) return; // 点按钮不触发
+    if (e.target.dataset.act) return;
     selectedKey = p.key;
     openDetail(p.key, p.name);
   });
 
-  // 按钮事件
   el.querySelectorAll('button[data-act]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const act = btn.dataset.act;
       if (act === 'reject') {
@@ -587,198 +1390,17 @@ function renderPerson(p, side) {
         $('rejectModal').classList.remove('hidden');
         return;
       }
-      if (act === 'detail') {
-        openDetail(p.key, p.name);
-        return;
-      }
       if (act === 'confirm') {
-        // 双组别（>1 个组别）时询问是否全部通过
-        if ((p.groups || []).length > 1) {
-          openGroupConfirm(p);
-          return;
-        }
-        await doAction(p.key, 'confirm', { groups: p.groups || [] });
+        if ((p.groups || []).length > 1) { openGroupConfirm(p); return; }
+        doAction(p.key, 'confirm', { groups: p.groups || [] });
         return;
       }
-      if (act === 'restore') {
-        await doAction(p.key, 'restore');
-        return;
-      }
-      await doAction(p.key, act);
+      if (act === 'restore') { doAction(p.key, 'restore'); return; }
+      doAction(p.key, act);
     });
   });
-
   return el;
 }
-
-// ---- 二级详情面板 ----
-function awardClass(award) {
-  if (!award) return 'award-other';
-  if (award.includes('国际金牌')) return 'award-intl';
-  if (award.includes('国际')) return 'award-intl';
-  if (award === '金牌') return 'award-gold';
-  if (award === '银牌') return 'award-silver';
-  if (award === '铜牌') return 'award-bronze';
-  if (award === '一等奖') return 'award-first';
-  return 'award-other';
-}
-
-function esc(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
-}
-
-// 由初中入学年份 + 比赛学年推算"当时读几年级"
-// 学年 = fall_semester ? 比赛年份 : 比赛年份 - 1
-// 初中入学年份 E，则第 (学年 - E + 1) 年为初一，依次为初二/初三/高一/高二/高三/大一...
-function stageLabel(schoolYear, enrollMiddle) {
-  if (enrollMiddle == null || schoolYear == null) return '';
-  const n = schoolYear - enrollMiddle + 1; // 第 n 个学年
-  if (n < 1) return '小学/未入学';
-  if (n <= 3) return `初${['一','二','三'][n-1]}`;
-  if (n <= 6) return `高${['一','二','三'][n-4]}`;
-  if (n <= 10) return `大${['一','二','三','四'][n-7] || '四'}`;
-  return `大${n-6}+`;
-}
-
-function renderDetail(data) {
-  const body = $('detailBody');
-
-  // 顶部：报名人完整信息卡片
-  const infoRows = [
-    ['学号', data.student_id],
-    ['花名', data.nickname],
-    ['一卡通', data.card_id],
-    ['手机', data.phone],
-    ['QQ', data.qq],
-    ['年级', data.grade_name],
-    ['组别', (data.groups || []).join('、')],
-    ['校区', data.campus],
-  ].filter(([, v]) => v != null && String(v).trim() !== '');
-  const infoCard = `<div class="detail-info-card">
-    <div class="detail-info-name">${esc(data.name || '')}</div>
-    <div class="detail-info-grid">
-      ${infoRows.map(([k, v]) => `<div class="info-item"><span class="info-label">${k}</span><span class="info-value">${esc(v)}</span></div>`).join('')}
-    </div>
-  </div>`;
-
-  if (!data || data.matched === false || !data.entries || data.entries.length === 0) {
-    body.innerHTML = infoCard + '<div class="detail-empty">该人在 OIerDb 获奖数据库中未找到记录</div>';
-    return;
-  }
-
-  const actualYear = data.grade_year;
-  let html = infoCard;
-
-  // 顶部提示：报名年级
-  if (actualYear) {
-    html += `<div class="detail-warn">
-      该报名人年级为 <b>${esc(data.grade_name || '')}（${actualYear} 级）</b>，即 ${actualYear} 年大学入学。
-      下方列出 OIerDb 中所有同名者的完整获奖轨迹，请核对<b>哪一个才是本人</b>。
-    </div>`;
-  }
-
-  const matchedEntries = data.entries.filter(e => e.is_match);
-  const otherEntries = data.entries.filter(e => !e.is_match);
-
-  function renderEntry(entry) {
-    const records = entry.records || [];
-    // 每条记录推算学段
-    const recRows = records.map((r) => {
-      const schoolYear = r.fall_semester ? (r.year || 0) : (r.year || 0) - 1;
-      const stage = stageLabel(schoolYear, entry.grade);
-      return { ...r, stage };
-    });
-
-    // 生成轨迹总结：初中X年入学 → 高中X年 → 大学X年
-    const em = entry.grade;
-    const uy = entry.univ_year;
-    let summary = '';
-    if (em != null && uy != null) {
-      const hs = em + 3; // 高中入学年份
-      summary = `初中 ${em} 年入学 · 高中 ${hs} 年入学 · 大学 ${uy} 年入学`;
-    }
-    // 最近一次获奖（记录已按年份倒序）
-    let latest = '';
-    if (recRows.length > 0) {
-      const r = recRows[0];
-      latest = `最近获奖：${r.year ?? '—'} 年 ${r.contest_name || '—'} ${r.award || '—'}（当时${r.stage || '—'}）`;
-    }
-
-    const badge = entry.is_match
-      ? '<span class="award-badge award-first" style="margin-left:8px;">可能本人</span>'
-      : '<span class="award-badge award-other" style="margin-left:8px;">同名非本人</span>';
-
-    // 逐条生成表格行
-    let tbody = '';
-    if (recRows.length === 0) {
-      tbody = '<tr><td colspan="6" style="color:var(--text-sub);text-align:center;">无获奖记录</td></tr>';
-    } else {
-      recRows.forEach((r) => {
-        const stageCls = /^高/.test(r.stage || '') ? 'style="font-weight:600;color:#c77a00;"' : '';
-        tbody += `<tr>
-          <td class="contest-name">${esc(r.contest_name || '—')}</td>
-          <td class="rec-year">${r.year ?? '—'}</td>
-          <td ${stageCls}>${esc(r.stage || '—')}</td>
-          <td><span class="award-badge ${awardClass(r.award)}">${esc(r.award || '—')}</span></td>
-          <td>${r.rank ?? '—'}</td>
-          <td>${esc(r.score || '—')}</td>
-        </tr>`;
-      });
-    }
-
-    // 返回一段完整的同名者卡片 HTML
-    return `<div class="detail-person" style="${entry.is_match ? 'border-color:var(--primary);' : ''}">
-      <div class="detail-person-head">
-        <div>
-          <span style="font-weight:600;">${esc(data.name)}</span>
-          ${badge}
-          <div class="uid">${esc(summary)}${entry.uid ? ' · UID ' + esc(entry.uid) : ''}</div>
-          ${latest ? `<div class="uid" style="color:var(--text);">${esc(latest)}</div>` : ''}
-        </div>
-        <a class="detail-link" href="${esc(entry.url)}" target="_blank" rel="noopener">
-          在 OIerDb 官网查看 ↗
-        </a>
-      </div>
-      <table class="rec-table">
-        <thead><tr>
-          <th>比赛</th><th>年份</th><th>当时年级</th><th>奖项</th><th>排名</th><th>分数</th>
-        </tr></thead>
-        <tbody>${tbody}</tbody>
-      </table>
-    </div>`;
-  }
-
-  // 可能本人优先展示，同名非本人跟在后面
-  matchedEntries.forEach(e => { html += renderEntry(e); });
-  otherEntries.forEach(e => { html += renderEntry(e); });
-
-  body.innerHTML = html;
-}
-
-async function openDetail(key, name) {
-  $('detailModal').classList.remove('hidden');
-  $('detailTitle').textContent = `选手详情 · ${name}`;
-  $('detailMeta').textContent = '正在查询…';
-  $('detailBody').innerHTML = '<div class="loading">加载中…</div>';
-  try {
-    const data = await api(`/api/person_detail?key=${encodeURIComponent(key)}&name=${encodeURIComponent(name)}`);
-    $('detailMeta').textContent = '';
-    renderDetail(data);
-  } catch (e) {
-    $('detailBody').innerHTML = '<div class="detail-empty">查询失败：' + esc(e.message) + '</div>';
-  }
-}
-
-$('detailClose').addEventListener('click', () => {
-  $('detailModal').classList.add('hidden');
-});
-$('detailModal').addEventListener('click', (e) => {
-  if (e.target === $('detailModal')) $('detailModal').classList.add('hidden');
-});
-
-let searchKeyword = '';  // 当前搜索关键词
 
 function matchSearch(p) {
   if (!searchKeyword) return true;
@@ -789,12 +1411,11 @@ function matchSearch(p) {
   return fields.includes(kw);
 }
 
-// 已通过栏的自动分类：返回该人所属的分类列表（可能多个，双选者多分类都显示）
 function classifyPerson(p) {
   const groups = p.groups || [];
-  const isPro = groups.includes('专业组');
-  const isNewcomer = groups.includes('大一组') || groups.includes('大二组');
-  const campus = (p.campus || '').includes('九龙湖') ? '九龙湖' : '四牌楼';
+  const isPro = groups.includes(GROUP_PROFESSIONAL);
+  const isNewcomer = groups.includes(GROUP_FRESHMAN) || groups.includes(GROUP_SOPHOMORE);
+  const campus = (p.campus || '').includes(CAMPUS_JIULONGHU) ? CAMPUS_JIULONGHU : CAMPUS_SIPAILOU;
   const result = [];
   if (isPro) result.push(campus + ' · 专业组');
   if (isNewcomer) result.push(campus + ' · 大一大二组');
@@ -802,53 +1423,40 @@ function classifyPerson(p) {
   return result;
 }
 
-// 分类展示顺序
 const CLASS_ORDER = [
-  '四牌楼 · 大一大二组',
-  '四牌楼 · 专业组',
-  '九龙湖 · 大一大二组',
-  '九龙湖 · 专业组',
+  '四牌楼 · 大一大二组', '四牌楼 · 专业组',
+  '九龙湖 · 大一大二组', '九龙湖 · 专业组',
 ];
 
 function render() {
-  const leftBody = $('leftBody');
-  const rightBody = $('rightBody');
-  leftBody.innerHTML = '';
-  rightBody.innerHTML = '';
+  const leftBody = $('leftBody'), rightBody = $('rightBody'), draftBody = $('draftBody');
+  leftBody.innerHTML = ''; rightBody.innerHTML = ''; draftBody.innerHTML = '';
 
   const leftList = state.left.filter(matchSearch);
   const rightList = state.right.filter(matchSearch);
+  const draftList = state.rejected.filter(matchSearch);
 
   if (leftList.length === 0) {
     leftBody.innerHTML = searchKeyword
-      ? '<div class="empty">待确认栏无匹配「' + searchKeyword + '」</div>'
+      ? `<div class="empty">待确认栏无匹配「${esc(searchKeyword)}」</div>`
       : '<div class="empty">没有待确认的选手</div>';
   } else {
     leftList.forEach(p => leftBody.appendChild(renderPerson(p, 'left')));
   }
 
-  // 右侧"已通过"栏：按 4 类分组展示
   if (rightList.length === 0) {
     rightBody.innerHTML = searchKeyword
-      ? '<div class="empty">已通过栏无匹配「' + searchKeyword + '」</div>'
+      ? `<div class="empty">已通过栏无匹配「${esc(searchKeyword)}」</div>`
       : '<div class="empty">还没有通过的人</div>';
   } else {
-    // 分组：双选者可能同时属于多个分类
     const groups = {};
     rightList.forEach(p => {
-      classifyPerson(p).forEach(cls => {
-        (groups[cls] = groups[cls] || []).push(p);
-      });
+      classifyPerson(p).forEach(cls => { (groups[cls] = groups[cls] || []).push(p); });
     });
-    // 按固定顺序渲染，缺失的分类也显示（空则提示）
-    CLASS_ORDER.forEach(cls => {
-      const members = groups[cls] || [];
+    const renderGroup = (cls, members) => {
       const groupEl = document.createElement('div');
       groupEl.className = 'group-block';
-      groupEl.innerHTML = `<div class="group-head">
-        <span class="group-title">${cls}</span>
-        <span class="group-count">${members.length} 人</span>
-      </div>`;
+      groupEl.innerHTML = `<div class="group-head"><span class="group-title">${esc(cls)}</span><span class="group-count">${members.length} 人</span></div>`;
       const body = document.createElement('div');
       body.className = 'group-body';
       if (members.length === 0) {
@@ -858,32 +1466,14 @@ function render() {
       }
       groupEl.appendChild(body);
       rightBody.appendChild(groupEl);
-    });
-    // 兜底：出现未在 CLASS_ORDER 中的分类（如"其他"）也渲染
-    Object.keys(groups).forEach(cls => {
-      if (CLASS_ORDER.includes(cls)) return;
-      const members = groups[cls];
-      const groupEl = document.createElement('div');
-      groupEl.className = 'group-block';
-      groupEl.innerHTML = `<div class="group-head">
-        <span class="group-title">${cls}</span>
-        <span class="group-count">${members.length} 人</span>
-      </div>`;
-      const body = document.createElement('div');
-      body.className = 'group-body';
-      members.forEach(p => body.appendChild(renderPerson(p, 'right')));
-      groupEl.appendChild(body);
-      rightBody.appendChild(groupEl);
-    });
+    };
+    CLASS_ORDER.forEach(cls => renderGroup(cls, groups[cls] || []));
+    Object.keys(groups).forEach(cls => { if (!CLASS_ORDER.includes(cls)) renderGroup(cls, groups[cls]); });
   }
 
-  // 草稿箱栏：展示被取消资格的选手
-  const draftBody = $('draftBody');
-  draftBody.innerHTML = '';
-  const draftList = state.rejected.filter(matchSearch);
   if (draftList.length === 0) {
     draftBody.innerHTML = searchKeyword
-      ? '<div class="empty">草稿箱无匹配「' + searchKeyword + '」</div>'
+      ? `<div class="empty">草稿箱无匹配「${esc(searchKeyword)}」</div>`
       : '<div class="empty">暂无被取消的选手</div>';
   } else {
     draftList.forEach(p => draftBody.appendChild(renderPerson(p, 'draft')));
@@ -898,297 +1488,1106 @@ function render() {
   $('exportBtn').disabled = state.right.length === 0;
 }
 
-async function refreshPeople() {
-  const data = await api('/api/people');
-  state = data;
-  render();
-  await refreshConfig();
-}
+// ---------- 操作（翻译自 server.py _api_action） ----------
+function doAction(key, action, extra = {}) {
+  const p = allPeople.find(x => x.key === key);
+  if (!p) { toast('未找到该选手'); return; }
 
-async function refreshConfig() {
-  const c = await api('/api/config');
-  $('yearInput').value = c.year;
-  $('registerPath').value = c.register_path || '';
-  // 更新操作按钮可用状态
-  const s1 = c.register_loaded, s2 = c.oierdb_loaded;
-  $('fetchBtn').disabled = !s1;
-  $('matchBtn').disabled = !(s1 && s2);
-}
+  const prev = { key, status: p.status, groups: p.passed_groups || [] };
+  historyStack.push(prev);
+  if (historyStack.length > 200) historyStack = historyStack.slice(-200);
 
-async function doAction(key, action, extra = {}) {
-  try {
-    await api('/api/action', { key, action, ...extra });
-    const msgs = {
-      confirm: '已确认报名成功',
-      undo: '已撤销',
-      reject: '已取消资格（移入草稿箱）',
-      restore: '已从草稿箱恢复',
-    };
-    toast(msgs[action] || '操作成功');
-    await refreshPeople();
-  } catch (e) {
-    toast('操作失败：' + e.message);
+  if (action === 'confirm') {
+    p.status = 'confirmed';
+    p.passed_groups = extra.groups || p.groups || [];
+  } else if (action === 'undo') {
+    p.status = 'pending';
+  } else if (action === 'reject') {
+    p.status = 'rejected';
+  } else if (action === 'restore') {
+    p.status = 'pending';
   }
+
+  const msgs = {
+    confirm: '已确认报名成功',
+    undo: '已撤销',
+    reject: '已取消资格（移入草稿箱）',
+    restore: '已从草稿箱恢复',
+  };
+  toast(msgs[action] || '操作成功');
+  rebuildState();
+  saveState();
+  render();
 }
 
-// ---- 双组别确认弹窗 ----
-let groupConfirmPerson = null;
+function doUndo() {
+  if (historyStack.length === 0) { toast('没有可回退的操作'); return; }
+  const entry = historyStack.pop();
+  const p = allPeople.find(x => x.key === entry.key);
+  if (p) {
+    p.status = entry.status;
+    p.passed_groups = entry.groups || [];
+  }
+  toast('已回退上一次操作');
+  rebuildState();
+  saveState();
+  render();
+}
+
+// ---------- 双组别确认弹窗 ----------
 function openGroupConfirm(p) {
   groupConfirmPerson = p;
   $('groupConfirmName').textContent = p.name;
   const list = $('groupConfirmList');
-  const groups = p.groups || [];
-  list.innerHTML = groups.map(g => `
+  list.innerHTML = (p.groups || []).map(g => `
     <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;cursor:pointer;">
       <input type="checkbox" class="group-check" value="${esc(g)}" checked>
       <span>${esc(g)}</span>
     </label>`).join('');
   $('groupConfirmModal').classList.remove('hidden');
 }
-
 function closeGroupConfirm() {
   $('groupConfirmModal').classList.add('hidden');
   groupConfirmPerson = null;
 }
 
-$('groupConfirmCancel').addEventListener('click', closeGroupConfirm);
-$('groupConfirmModal').addEventListener('click', (e) => {
-  if (e.target === $('groupConfirmModal')) closeGroupConfirm();
-});
+// ---------- 导出（翻译自 output.py，用 SheetJS 生成下载） ----------
+const EXCEL_COLUMNS = [
+  ['name', '姓名'], ['student_id', '学号'], ['nickname', '花名'],
+  ['card_id', '一卡通号'], ['phone', '手机号'], ['qq', 'QQ号'],
+  ['grade_name', '年级'], ['groups', '组别'], ['campus', '校区'],
+];
 
-// 全部通过
-$('groupConfirmAll').addEventListener('click', async () => {
-  if (!groupConfirmPerson) return;
-  const p = groupConfirmPerson;
-  closeGroupConfirm();
-  await doAction(p.key, 'confirm', { groups: p.groups || [] });
-});
+function classifyForExport(p) {
+  // 返回 [{newcomer, campus}] 列表（双组别多分组）
+  const groups = p.groups || [];
+  const campus = (p.campus || '').includes(CAMPUS_JIULONGHU) ? CAMPUS_JIULONGHU : CAMPUS_SIPAILOU;
+  const result = [];
+  const isPro = groups.includes(GROUP_PROFESSIONAL);
+  const isNew = groups.includes(GROUP_FRESHMAN) || groups.includes(GROUP_SOPHOMORE);
+  if (isNew) result.push({ newcomer: true, campus });
+  if (isPro) result.push({ newcomer: false, campus });
+  return result;
+}
 
-// 仅通过所选组别
-$('groupConfirmPartial').addEventListener('click', async () => {
-  if (!groupConfirmPerson) return;
-  const p = groupConfirmPerson;
-  const checked = [...document.querySelectorAll('#groupConfirmList .group-check:checked')]
-    .map(c => c.value);
-  closeGroupConfirm();
-  if (checked.length === 0) {
-    toast('请至少勾选一个组别');
-    return;
-  }
-  await doAction(p.key, 'confirm', { groups: checked });
-});
+function exportAll() {
+  const passed = state.right;
+  if (passed.length === 0) { toast('没有报名成功的人'); return; }
 
-// ---- 侧边菜单切换 ----
-const menuItems = document.querySelectorAll('.menu-item[data-view]');
-menuItems.forEach(item => {
-  item.addEventListener('click', () => {
-    menuItems.forEach(m => m.classList.remove('active'));
-    item.classList.add('active');
-    const view = item.dataset.view;
-    const leftCol = $('leftCol');
-    const rightCol = $('rightCol');
-    const draftCol = $('draftCol');
-    if (view === 'pending') {
-      leftCol.style.display = '';
-      rightCol.style.display = 'none';
-      draftCol.style.display = 'none';
-    } else if (view === 'passed') {
-      leftCol.style.display = 'none';
-      rightCol.style.display = '';
-      draftCol.style.display = 'none';
-    } else if (view === 'draft') {
-      leftCol.style.display = 'none';
-      rightCol.style.display = 'none';
-      draftCol.style.display = '';
-    }
+  const OUTPUT_GROUPS = [
+    { newcomer: true, campus: CAMPUS_SIPAILOU, label: '四牌楼校区_大一大二组' },
+    { newcomer: false, campus: CAMPUS_SIPAILOU, label: '四牌楼校区_专业组' },
+    { newcomer: true, campus: CAMPUS_JIULONGHU, label: '九龙湖校区_大一大二组' },
+    { newcomer: false, campus: CAMPUS_JIULONGHU, label: '九龙湖校区_专业组' },
+  ];
+
+  const buckets = {};
+  OUTPUT_GROUPS.forEach(g => { buckets[`${g.newcomer}|${g.campus}`] = []; });
+  passed.forEach(p => {
+    classifyForExport(p).forEach(c => {
+      const k = `${c.newcomer}|${c.campus}`;
+      if (buckets[k]) buckets[k].push(p);
+    });
   });
-});
 
-// ---- 搜索 ----
-$('searchInput').addEventListener('input', () => {
-  searchKeyword = $('searchInput').value.trim();
-  render();
-});
+  const lines = [];
+  OUTPUT_GROUPS.forEach(g => {
+    const members = buckets[`${g.newcomer}|${g.campus}`] || [];
+    lines.push({ label: g.label, count: members.length, members });
+  });
 
-$('searchClear').addEventListener('click', () => {
-  $('searchInput').value = '';
-  searchKeyword = '';
-  render();
-});
+  // 生成 4 个 Excel 文件并触发下载
+  lines.forEach(({ label, members }) => {
+    downloadGroupExcel(label, members);
+  });
 
-// ---- 回退上一次操作 ----
-$('undoBtn').addEventListener('click', async () => {
-  try {
-    await api('/api/undo', {});
-    toast('已回退上一次操作');
-    await refreshPeople();
-  } catch (e) {
-    toast('回退失败：' + e.message);
-  }
-});
+  toast('导出成功！共 4 组');
+  alert('已生成 4 个 Excel 文件并开始下载：\n\n' + lines.map(l => `${l.label}：${l.count} 人`).join('\n'));
+}
 
-// ---- 清除数据 ----
-$('resetBtn').addEventListener('click', async () => {
-  if (!confirm('确定要清除当前所有数据吗？\n\n将清空报名表、筛选结果和人工确认状态，以便处理下一份 Excel。\n（OIerDb 获奖数据会保留，无需重新爬取）')) {
-    return;
-  }
-  try {
-    await api('/api/reset', {});
-    state = { left: [], right: [], rejected: [] };
-    searchKeyword = '';
-    $('searchInput').value = '';
-    render();
-    await refreshConfig();
-    toast('数据已清除，可加载新的报名表');
-  } catch (e) {
-    toast('清除失败：' + e.message);
-  }
-});
+function downloadGroupExcel(label, members) {
+  const header = EXCEL_COLUMNS.map(([, t]) => t);
+  const rows = members.map(p => {
+    return EXCEL_COLUMNS.map(([f]) => {
+      if (f === 'groups') return (p.groups || []).join('、');
+      return p[f] != null ? p[f] : '';
+    });
+  });
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, label);
+  XLSX.writeFile(wb, `${label}.xlsx`);
+}
 
-// ---- 事件绑定 ----
-$('setYearBtn').addEventListener('click', async () => {
+// ---------- 按钮状态 ----------
+function updateButtons() {
+  $('fetchBtn').disabled = !registerLoaded;
+  $('matchBtn').disabled = !(registerLoaded && oierdbLoaded);
+  $('exportBtn').disabled = state.right.length === 0;
+}
+
+// ---------- 事件绑定 ----------
+$('setYearBtn').addEventListener('click', () => {
   const year = parseInt($('yearInput').value, 10);
-  if (!year) { toast('请输入有效年份'); return; }
-  try {
-    await api('/api/set_year', { year });
-    toast('年份已设为 ' + year);
-  } catch (e) { toast(e.message); }
+  if (!year || year < 2000 || year > 2100) { toast('请输入有效年份'); return; }
+  currentYear = year;
+  saveState();
+  toast('年份已设为 ' + year);
 });
 
-$('loadBtn').addEventListener('click', async () => {
-  const path = $('registerPath').value.trim();
-  if (!path) { toast('请输入报名表路径'); return; }
-  $('loadBtn').disabled = true;
-  $('loadBtn').textContent = '加载中…';
-  try {
-    const r = await api('/api/load_register', { path });
-    toast(`成功识别 ${r.count} 名报名人`);
-    await refreshConfig();
-  } catch (e) {
-    toast('加载失败：' + e.message);
-  } finally {
-    $('loadBtn').disabled = false;
-    $('loadBtn').textContent = '加载报名表';
-  }
+$('browseBtn').addEventListener('click', () => $('registerFile').click());
+
+$('registerFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  $('registerPath').value = file.name;
+  await loadRegisterFile(file);
+  e.target.value = '';  // 允许重复选择同一文件
 });
 
-$('fetchBtn').addEventListener('click', async () => {
-  $('fetchBtn').disabled = true;
-  $('fetchBtn').textContent = '爬取中（可能较慢）…';
-  try {
-    const r = await api('/api/fetch_oierdb', { force: false });
-    toast(`爬取成功：${r.total} 条记录，${r.names} 个姓名`);
-    await refreshConfig();
-  } catch (e) {
-    toast('爬取失败：' + e.message);
-  } finally {
-    $('fetchBtn').textContent = '爬取 OIerDb 数据';
-    await refreshConfig();
-  }
-});
-
-$('matchBtn').addEventListener('click', async () => {
-  $('matchBtn').disabled = true;
-  try {
-    const r = await api('/api/run_match', {});
-    toast(`筛选完成：共 ${r.total} 人，待确认 ${r.pending} 人`);
-    await refreshPeople();
-  } catch (e) {
-    toast('筛选失败：' + e.message);
-  } finally {
-    await refreshConfig();
-  }
-});
-
-$('exportBtn').addEventListener('click', async () => {
-  try {
-    const r = await api('/api/export', {});
-    const lines = r.groups.map(g => `${g.label}：${g.count} 人`);
-    toast('导出成功！' + lines.join('；'));
-    // 弹窗展示
-    alert('导出成功，文件已保存到 output 目录：\n\n' + lines.join('\n'));
-  } catch (e) {
-    toast('导出失败：' + e.message);
-  }
-});
-
-$('rejectCancel').addEventListener('click', () => {
-  $('rejectModal').classList.add('hidden');
-  pendingRejectKey = null;
-});
-$('rejectConfirm').addEventListener('click', async () => {
-  $('rejectModal').classList.add('hidden');
-  if (pendingRejectKey) {
-    await doAction(pendingRejectKey, 'reject');
-    pendingRejectKey = null;
-  }
-});
-
-// 支持拖拽/粘贴路径（拖拽只能拿到文件名，需配合 data 目录或后端解析）
 $('registerPath').addEventListener('dragover', (e) => e.preventDefault());
 $('registerPath').addEventListener('drop', (e) => {
   e.preventDefault();
   const file = e.dataTransfer.files[0];
   if (file) {
     $('registerPath').value = file.name;
-    toast('已填入文件名，请确保该文件在 data 目录或「下载」文件夹中');
+    loadRegisterFile(file);
   }
 });
 
-// 浏览按钮：列出可选的报名表文件
-function fmtSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1024 / 1024).toFixed(2) + ' MB';
-}
-
-async function openBrowse() {
-  $('browseModal').classList.remove('hidden');
-  await scanFiles();
-}
-
-async function scanFiles() {
-  const listEl = $('browseList');
-  listEl.innerHTML = '<div class="loading">扫描中…</div>';
+async function loadRegisterFile(file) {
+  $('loadBtn').disabled = true;
+  $('loadBtn').textContent = '读取中…';
   try {
-    const r = await api('/api/list_files');
-    const files = r.files || [];
-    if (files.length === 0) {
-      listEl.innerHTML = '<div class="empty">未发现 Excel 文件<br>请把报名表放到程序目录下的 data 文件夹</div>';
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array' });
+    const people = readRegisterFromWorkbook(wb, currentYear);
+    if (people.length === 0) {
+      toast('未能识别出报名人，请检查表格表头是否含「姓名/学号」等字段');
       return;
     }
-    listEl.innerHTML = '';
-    files.forEach(f => {
-      const el = document.createElement('div');
-      el.className = 'person-card';
-      el.style.cursor = 'pointer';
-      const d = new Date(f.mtime * 1000);
-      const timeStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      el.innerHTML = `
-        <div class="name-row"><span class="name">${f.name}</span></div>
-        <div class="info">${fmtSize(f.size)} · ${timeStr}<br><span style="font-size:11px;">${f.path}</span></div>
-      `;
-      el.addEventListener('click', () => {
-        $('registerPath').value = f.path;
-        $('browseModal').classList.add('hidden');
-        toast('已选择：' + f.name);
-      });
-      listEl.appendChild(el);
-    });
-  } catch (e) {
-    listEl.innerHTML = '<div class="empty">扫描失败：' + e.message + '</div>';
+    // 重置匹配状态，但保留数据库
+    matched = false;
+    allPeople = people;
+    historyStack = [];
+    rebuildState();
+    registerLoaded = true;
+    saveState();
+    toast(`成功识别 ${people.length} 名报名人`);
+    updateButtons();
+  } catch (err) {
+    toast('读取失败：' + err.message);
+  } finally {
+    $('loadBtn').disabled = false;
+    $('loadBtn').textContent = '加载报名表';
   }
 }
 
-$('browseBtn').addEventListener('click', openBrowse);
-$('browseRescan').addEventListener('click', scanFiles);
-$('browseCancel').addEventListener('click', () => {
-  $('browseModal').classList.add('hidden');
+$('loadBtn').addEventListener('click', () => $('registerFile').click());
+
+$('fetchBtn').addEventListener('click', loadOierdb);
+
+// ---------- 本地模式：联网更新 OIerDb 数据 ----------
+// 页面本身是纯静态的；只有用 `python run.py` 启动时，本地服务才会响应这些接口。
+async function probeLocalServer() {
+  try {
+    const r = await fetch('api/ping', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j && j.ok && j.local) {
+      $('updateDbBtn').style.display = '';
+      $('updateDbBtn').title = `本地服务 v${j.version}：从 OIerDb 官方接口重新下载获奖数据`;
+    }
+  } catch (e) { /* 纯静态部署下没有本地服务，忽略 */ }
+}
+
+$('updateDbBtn').addEventListener('click', async () => {
+  const btn = $('updateDbBtn');
+  if (!confirm('将从 OIerDb 官方接口重新下载获奖数据（约 13MB），并覆盖页面内置的快照。\n\n确定继续？')) return;
+  btn.disabled = true;
+  btn.textContent = '更新中…';
+  try {
+    const r = await fetch('api/update_oierdb', { method: 'POST' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    let st = null;
+    for (;;) {
+      await new Promise(res => setTimeout(res, 1200));
+      const s = await fetch('api/update_status', { cache: 'no-store' });
+      st = await s.json();
+      btn.textContent = '更新中… ' + (st.message || '');
+      if (st.state === 'done' || st.state === 'error') break;
+    }
+    if (st.state === 'error') throw new Error(st.message || '未知错误');
+    toast(st.message || '数据已更新');
+    oierdbLoaded = false;
+    await loadOierdb();
+  } catch (e) {
+    toast('更新失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '联网更新数据库';
+  }
 });
 
-// 初始化
-refreshConfig();
-refreshPeople();
+probeLocalServer();
+
+$('matchBtn').addEventListener('click', async () => {
+  if (!registerLoaded) { toast('请先加载报名表'); return; }
+  if (!oierdbLoaded) { toast('请先加载 OIerDb 数据库'); return; }
+  $('matchBtn').disabled = true;
+  try {
+    allPeople = matchPeople(allPeople);
+    assignDefaultStatuses(allPeople);
+    matched = true;
+    rebuildState();
+    saveState();
+    render();
+    const pending = state.left.length;
+    toast(`筛选完成：共 ${allPeople.length} 人，待确认 ${pending} 人`);
+  } catch (e) {
+    toast('筛选失败：' + e.message);
+  } finally {
+    updateButtons();
+  }
+});
+
+$('exportBtn').addEventListener('click', exportAll);
+
+$('undoBtn').addEventListener('click', doUndo);
+
+$('resetBtn').addEventListener('click', () => {
+  if (!confirm('确定要清除当前所有数据吗？\n\n将清空报名表、筛选结果和人工确认状态。\n（OIerDb 数据库会保留，无需重新加载）')) return;
+  clearState();
+  searchKeyword = '';
+  $('searchInput').value = '';
+  $('registerPath').value = '';
+  render();
+  updateButtons();
+  toast('数据已清除，可加载新的报名表');
+});
+
+$('rejectCancel').addEventListener('click', () => {
+  $('rejectModal').classList.add('hidden');
+  pendingRejectKey = null;
+});
+$('rejectConfirm').addEventListener('click', () => {
+  $('rejectModal').classList.add('hidden');
+  if (pendingRejectKey) { doAction(pendingRejectKey, 'reject'); pendingRejectKey = null; }
+});
+
+$('groupConfirmCancel').addEventListener('click', closeGroupConfirm);
+$('groupConfirmModal').addEventListener('click', (e) => {
+  if (e.target === $('groupConfirmModal')) closeGroupConfirm();
+});
+$('groupConfirmAll').addEventListener('click', () => {
+  if (!groupConfirmPerson) return;
+  const p = groupConfirmPerson;
+  closeGroupConfirm();
+  doAction(p.key, 'confirm', { groups: p.groups || [] });
+});
+$('groupConfirmPartial').addEventListener('click', () => {
+  if (!groupConfirmPerson) return;
+  const p = groupConfirmPerson;
+  const checked = [...document.querySelectorAll('#groupConfirmList .group-check:checked')].map(c => c.value);
+  closeGroupConfirm();
+  if (checked.length === 0) { toast('请至少勾选一个组别'); return; }
+  doAction(p.key, 'confirm', { groups: checked });
+});
+
+$('detailClose').addEventListener('click', () => $('detailModal').classList.add('hidden'));
+$('detailModal').addEventListener('click', (e) => {
+  if (e.target === $('detailModal')) $('detailModal').classList.add('hidden');
+});
+
+// 侧边菜单切换
+document.querySelectorAll('.menu-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.menu-item[data-view]').forEach(m => m.classList.remove('active'));
+    item.classList.add('active');
+    const view = item.dataset.view;
+    $('leftCol').style.display = view === 'pending' ? '' : 'none';
+    $('rightCol').style.display = view === 'passed' ? '' : 'none';
+    $('draftCol').style.display = view === 'draft' ? '' : 'none';
+  });
+});
+
+// 搜索
+$('searchInput').addEventListener('input', () => {
+  searchKeyword = $('searchInput').value.trim();
+  render();
+});
+$('searchClear').addEventListener('click', () => {
+  $('searchInput').value = '';
+  searchKeyword = '';
+  render();
+});
+
+// ============ 台签批量生成 ============
+let badgeRosterWB = null;   // 报名名单 workbook
+let badgeAccountWB = null;  // 账号密码 workbook
+let badgeMatchResult = null;
+
+// 表头别名映射（自动识别）
+const BADGE_FIELDS = {
+  name:  ['姓名', '名字', '选手姓名', '参赛选手', 'name', '学生姓名'],
+  account: ['账号', '账户', '用户名', '登录账号', '比赛账号', 'account', 'username', 'user'],
+  password: ['密码', '口令', 'password', 'pwd', 'pass'],
+  code: ['准入码', '准号码', '入场码', '验证码', 'code', '准入密码'],
+  studentId: ['学号', '学生证号', 'studentid', 'sid'],
+  cardId: ['一卡通号', '一卡通', 'cardid', '卡号'],
+};
+
+function normHeader(h) {
+  return String(h == null ? '' : h).trim().toLowerCase().replace(/[\s:：（）()]/g, '');
+}
+function detectColumn(headers, field) {
+  const aliases = BADGE_FIELDS[field].map(normHeader);
+  for (let i = 0; i < headers.length; i++) {
+    const h = normHeader(headers[i]);
+    if (aliases.some(a => h === a)) return i;
+  }
+  // 模糊包含（别名至少2字符）
+  for (let i = 0; i < headers.length; i++) {
+    const h = normHeader(headers[i]);
+    if (aliases.some(a => a.length >= 2 && (h.includes(a) || a.includes(h)))) return i;
+  }
+  return -1;
+}
+function sheetRows(wb) {
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+}
+function cellStr(v) {
+  if (v == null) return '';
+  return String(v).trim();
+}
+
+// 读取账号密码表 -> 建立索引
+function parseAccountTable(wb) {
+  const rows = sheetRows(wb);
+  if (!rows.length) return { list: [], cols: {} };
+  const headers = rows[0];
+  const cols = {
+    name: detectColumn(headers, 'name'),
+    account: detectColumn(headers, 'account'),
+    password: detectColumn(headers, 'password'),
+    code: detectColumn(headers, 'code'),
+    studentId: detectColumn(headers, 'studentId'),
+    cardId: detectColumn(headers, 'cardId'),
+  };
+  const list = [];
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row || row.every(c => !cellStr(c))) continue;
+    list.push({
+      name: cols.name >= 0 ? cellStr(row[cols.name]) : '',
+      account: cols.account >= 0 ? cellStr(row[cols.account]) : '',
+      password: cols.password >= 0 ? cellStr(row[cols.password]) : '',
+      code: cols.code >= 0 ? cellStr(row[cols.code]) : '',
+      studentId: cols.studentId >= 0 ? cellStr(row[cols.studentId]) : '',
+      cardId: cols.cardId >= 0 ? cellStr(row[cols.cardId]) : '',
+      row: r + 1,
+    });
+  }
+  return { list, cols, headers };
+}
+
+// 读取报名名单（上传的Excel）
+function parseRosterTable(wb) {
+  const rows = sheetRows(wb);
+  if (!rows.length) return [];
+  const headers = rows[0];
+  const nameC = detectColumn(headers, 'name');
+  const sidC = detectColumn(headers, 'studentId');
+  const cardC = detectColumn(headers, 'cardId');
+  const list = [];
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row || row.every(c => !cellStr(c))) continue;
+    list.push({
+      name: nameC >= 0 ? cellStr(row[nameC]) : '',
+      studentId: sidC >= 0 ? cellStr(row[sidC]) : '',
+      cardId: cardC >= 0 ? cellStr(row[cardC]) : '',
+    });
+  }
+  return list;
+}
+
+function normName(s) { return cellStr(s).replace(/\s+/g, ''); }
+
+// 匹配：姓名优先，学号/一卡通兜底
+function doBadgeMatch() {
+  let roster;
+  if (badgeRosterWB) {
+    roster = parseRosterTable(badgeRosterWB);
+  } else {
+    toast('请先上传本地报名名单 Excel'); return null;
+  }
+  if (!badgeAccountWB) { toast('请先选择账号密码表'); return null; }
+  const acc = parseAccountTable(badgeAccountWB);
+  if (acc.cols.name < 0 && acc.cols.account < 0) {
+    toast('账号密码表未识别到「姓名」或「账号」列'); return null;
+  }
+
+  // 账号表索引
+  const byName = new Map(), bySid = new Map(), byCard = new Map();
+  acc.list.forEach(a => {
+    const n = normName(a.name);
+    if (n) { if (!byName.has(n)) byName.set(n, []); byName.get(n).push(a); }
+    if (a.studentId) { if (!bySid.has(a.studentId)) bySid.set(a.studentId, []); bySid.get(a.studentId).push(a); }
+    if (a.cardId) { if (!byCard.has(a.cardId)) byCard.set(a.cardId, []); byCard.get(a.cardId).push(a); }
+  });
+
+  const matchedList = [], missing = [], duplicateNames = [];
+  const usedAcc = new Set();
+  roster.forEach(p => {
+    let cand = null, via = '';
+    const n = normName(p.name);
+    // 1 姓名精确
+    if (n && byName.has(n)) {
+      const arr = byName.get(n).filter(a => !usedAcc.has(a.row));
+      if (arr.length === 1) { cand = arr[0]; via = '姓名'; }
+      else if (arr.length > 1) { duplicateNames.push(p.name + '（账号表' + arr.length + '条）'); cand = arr[0]; via = '姓名(重复取首条)'; }
+    }
+    // 2 学号兜底
+    if (!cand && p.studentId && bySid.has(p.studentId)) {
+      const arr = bySid.get(p.studentId).filter(a => !usedAcc.has(a.row));
+      if (arr.length) { cand = arr[0]; via = '学号'; }
+    }
+    // 3 一卡通兜底
+    if (!cand && p.cardId && byCard.has(p.cardId)) {
+      const arr = byCard.get(p.cardId).filter(a => !usedAcc.has(a.row));
+      if (arr.length) { cand = arr[0]; via = '一卡通'; }
+    }
+    if (cand) {
+      usedAcc.add(cand.row);
+      matchedList.push({ name: p.name || cand.name, account: cand.account, password: cand.password, code: cand.code, via });
+    } else {
+      missing.push(p.name || '(无名)');
+    }
+  });
+  // 账号表中未被使用的（不匹配数据）
+  const unused = acc.list.filter(a => !usedAcc.has(a.row));
+
+  return { matchedList, missing, duplicateNames, unused, accCols: acc.cols, rosterCount: roster.length };
+}
+
+function renderBadgeReport(res) {
+  const el = $('badgeReport');
+  el.classList.remove('hidden');
+  let h = `<div><span class="rpt-ok">✓ 成功匹配 ${res.matchedList.length}</span> / 报名名单共 ${res.rosterCount} 人</div>`;
+  const accTotal = res.matchedList.length + res.unused.length;
+  h += `<div>账号密码表共 ${accTotal} 条</div>`;
+  if (res.missing.length) {
+    h += `<div class="rpt-warn">⚠ 未匹配到账号密码（${res.missing.length}）：</div><ul>${res.missing.slice(0,30).map(n=>`<li>${esc(n)}</li>`).join('')}${res.missing.length>30?'<li>…等</li>':''}</ul>`;
+  }
+  if (res.duplicateNames.length) {
+    h += `<div class="rpt-warn">⚠ 账号表重名（取首条，${res.duplicateNames.length}）：</div><ul>${res.duplicateNames.slice(0,20).map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`;
+  }
+  if (res.unused.length) {
+    h += `<div class="rpt-warn">⚠ 账号表中未被使用（${res.unused.length}）：</div><ul>${res.unused.slice(0,20).map(a=>`<li>${esc(a.name||a.account||('第'+a.row+'行'))}</li>`).join('')}${res.unused.length>20?'<li>…等</li>':''}</ul>`;
+  }
+  if (res.matchedList.length) {
+    h += `<div style="margin-top:8px;">台签内容预览（前3条）：</div>`;
+    h += `<div class="rpt-preview">${res.matchedList.slice(0,3).map(p=>`姓名:${p.name}  账号:${p.account}  密码:${p.password}  准入码:${p.code}  [匹配方式:${p.via}]`).join('\n')}</div>`;
+  }
+  el.innerHTML = h;
+}
+
+function xmlEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'
+  }[c]));
+}
+
+// 从模板生成单个台签单元 XML
+// title1 / title2 分别对应标题上行、下行（模板中为 PLACE_HOLDER_5 / PLACE_HOLDER_6）
+function buildUnitXml(templateDoc, person, title1, title2) {
+  // 模板里每个占位符可能出现多次（Word 在 drawing/VML 备份中也写了文本），必须全局替换
+  const rep = (s, ph, val) => s.split(ph).join(xmlEsc(val));
+  let u = templateDoc.unitXml;
+  u = rep(u, 'PLACE_HOLDER_1', person.name);
+  u = rep(u, 'PLACE_HOLDER_2', person.account);
+  u = rep(u, 'PLACE_HOLDER_3', person.password);
+  u = rep(u, 'PLACE_HOLDER_4', person.code);
+  u = rep(u, 'PLACE_HOLDER_5', title1 == null ? '' : title1);
+  u = rep(u, 'PLACE_HOLDER_6', title2 == null ? '' : title2);
+  return u;
+}
+
+// 单元末尾的空段落只是携带分节符，保留在末尾会多出一张空白页；
+// 把最后一个分节符从段落级提升为 body 级，页面数就和人数一致了
+function liftTrailingSect(xml) {
+  const i = xml.lastIndexOf('<w:p ');
+  if (i < 0) return xml;
+  const m = xml.slice(i).match(/<w:sectPr[\s\S]*?<\/w:sectPr>/);
+  if (!m) return xml;
+  const be = xml.indexOf('</w:body>', i);
+  if (be < 0) return xml;
+  return xml.slice(0, i) + m[0] + xml.slice(be);
+}
+
+// 生成 docx（合并/单个）
+async function generateBadgeDocx(res) {
+  if (!res || !res.matchedList.length) { toast('没有可生成的台签'); return; }
+  const genBtn = $('badgeGenerateBtn');
+  genBtn.disabled = true; genBtn.textContent = '生成中…';
+  try {
+    if (typeof JSZip === 'undefined') { toast('JSZip 未加载，请检查网络'); return; }
+    // 加载模板
+    const resp = await fetch('badge_template.docx');
+    if (!resp.ok) { toast('台签模板加载失败'); return; }
+    const tplBuf = await resp.arrayBuffer();
+    const zip = await JSZip.loadAsync(tplBuf);
+    const docXml = await zip.file('word/document.xml').async('string');
+    const bStart = docXml.indexOf('<w:body>') + '<w:body>'.length;
+    const bEnd = docXml.indexOf('</w:body>', bStart);
+    const head = docXml.slice(0, bStart);
+    const unitXml = docXml.slice(bStart, bEnd); // 整个 body 即一个台签单元（含分节符）
+    const tail = docXml.slice(bEnd); // </w:body></w:document>
+    const tpl = { unitXml };
+    const prefix = cellStr($('badgeNamePrefix').value) || '台签';
+    const mode = $('badgeOutputMode').value;
+    const badgeTitle1 = cellStr($('badgeTitle1').value);
+    const badgeTitle2 = cellStr($('badgeTitle2').value);
+
+    if (mode === 'merged') {
+      // 合并：所有单元顺序拼接，每个单元自带分节符（三栏版式）
+      const units = res.matchedList.map(p => buildUnitXml(tpl, p, badgeTitle1, badgeTitle2)).join('');
+      const newXml = liftTrailingSect(head + units + tail);
+      zip.file('word/document.xml', newXml);
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      downloadBlob(blob, prefix + '_全部_' + res.matchedList.length + '人.docx');
+    } else {
+      // 每人单独一个 docx，打包 zip
+      const outZip = new JSZip();
+      const total = res.matchedList.length;
+      for (let idx = 0; idx < total; idx++) {
+        const p = res.matchedList[idx];
+        genBtn.textContent = `生成中… ${idx + 1}/${total}`;
+        const oneXml = liftTrailingSect(head + buildUnitXml(tpl, p, badgeTitle1, badgeTitle2) + tail);
+        const oneZip = zip.clone();
+        oneZip.file('word/document.xml', oneXml);
+        const oneBuf = await oneZip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+        const safeName = (cellStr(p.name) || '选手').replace(/[\\/:*?"<>|]/g, '_');
+        outZip.file(prefix + '_' + safeName + '.docx', oneBuf);
+        // 让浏览器有机会渲染进度
+        if (idx % 5 === 0) await new Promise(r => setTimeout(r, 0));
+      }
+      genBtn.textContent = '正在打包…';
+      const blob = await outZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      downloadBlob(blob, prefix + '_个人版_' + total + '份.zip');
+    }
+    toast('台签生成完成，共 ' + res.matchedList.length + ' 人');
+  } catch (e) {
+    console.error(e);
+    toast('生成失败：' + (e && e.message ? e.message : e));
+  } finally {
+    genBtn.disabled = false; genBtn.textContent = '生成台签 docx';
+  }
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// 绑定台签生成事件
+$('menuBadge').addEventListener('click', () => {
+  $('badgeModal').classList.remove('hidden');
+  $('badgeReport').classList.add('hidden');
+  badgeMatchResult = null;
+  $('badgeGenerateBtn').disabled = true;
+});
+$('badgeClose').addEventListener('click', () => $('badgeModal').classList.add('hidden'));
+$('badgeModal').addEventListener('click', (e) => { if (e.target === $('badgeModal')) $('badgeModal').classList.add('hidden'); });
+$('badgeRosterBrowse').addEventListener('click', () => $('badgeRosterFile').click());
+$('badgeAccountBrowse').addEventListener('click', () => $('badgeAccountFile').click());
+$('badgeRosterFile').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  $('badgeRosterPath').value = f.name;
+  const r = new FileReader();
+  r.onload = (ev) => { try { badgeRosterWB = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); toast('报名名单已读取'); } catch(err){ toast('报名名单读取失败'); } };
+  r.readAsArrayBuffer(f);
+});
+$('badgeAccountFile').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  $('badgeAccountPath').value = f.name;
+  const r = new FileReader();
+  r.onload = (ev) => { try { badgeAccountWB = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); toast('账号密码表已读取'); } catch(err){ toast('账号密码表读取失败'); } };
+  r.readAsArrayBuffer(f);
+});
+$('badgePreviewBtn').addEventListener('click', () => {
+  const btn = $('badgePreviewBtn');
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '匹配中…';
+  const report = $('badgeReport');
+  report.classList.remove('hidden');
+  report.innerHTML = '<div style="color:var(--text-sub);">⏳ 正在读取表格并匹配，请稍候…</div>';
+  // 让浏览器先渲染"匹配中"状态，再执行计算
+  setTimeout(() => {
+    try {
+      badgeMatchResult = doBadgeMatch();
+      if (badgeMatchResult) {
+        renderBadgeReport(badgeMatchResult);
+        $('badgeGenerateBtn').disabled = badgeMatchResult.matchedList.length === 0;
+      }
+    } catch (e) {
+      console.error('检查匹配失败：', e);
+      report.innerHTML = '<div class="rpt-err">✗ 检查匹配时出错：' + esc(e && e.message ? e.message : e) + '</div>';
+      $('badgeGenerateBtn').disabled = true;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  }, 50);
+});
+$('badgeGenerateBtn').addEventListener('click', () => {
+  if (!badgeMatchResult) badgeMatchResult = doBadgeMatch();
+  if (badgeMatchResult) generateBadgeDocx(badgeMatchResult);
+});
+
+// ============ 准考证批量生成 ============
+let ticketRosterWB = null;
+let ticketAccountWB = null;
+let ticketData = null;  // 匹配后的完整准考证数据
+
+// 名单字段识别（姓名/年级/校区/组别/一卡通）
+const TICKET_FIELDS = {
+  name: ['姓名', '名字', 'name'],
+  grade: ['年级', 'grade'],
+  campus: ['校区', '参赛地点', '地点', 'campus'],
+  groups: ['组别', 'group'],
+  cardId: ['一卡通号', '一卡通', 'cardid'],
+  studentId: ['学号', 'studentid'],
+};
+function detectTicketCol(headers, field) {
+  const aliases = TICKET_FIELDS[field].map(normHeader);
+  for (let i = 0; i < headers.length; i++) {
+    const h = normHeader(headers[i]);
+    if (aliases.some(a => h === a)) return i;
+  }
+  for (let i = 0; i < headers.length; i++) {
+    const h = normHeader(headers[i]);
+    if (aliases.some(a => a.length >= 2 && (h.includes(a) || a.includes(h)))) return i;
+  }
+  return -1;
+}
+
+// 年级 -> "大一（26级）" 格式
+const GRADE_ORDER = { '大一': 0, '大二': 1, '大三': 2, '大四': 3, '研一': 4, '研二': 5, '研三': 6 };
+function formatGrade(gradeRaw, baseYear) {
+  const g = cellStr(gradeRaw);
+  if (!g) return '';
+  // 已经带"（xx级）"的直接用
+  if (/级/.test(g)) return g;
+  // "大一(26级)" 括号里是别的内容也先原样
+  const key = Object.keys(GRADE_ORDER).find(k => g.startsWith(k));
+  if (key) {
+    const y = (baseYear || currentYear) - GRADE_ORDER[key];
+    return `${key}（${String(y).slice(-2)}级）`;
+  }
+  // 纯数字年份 "24级" -> 大几未知，原样补格式
+  const m = g.match(/(\d{2})级/);
+  if (m) return g;
+  return g;
+}
+
+function getTicketRoster() {
+  if (ticketRosterWB) {
+    const rows = sheetRows(ticketRosterWB);
+    if (!rows.length) return [];
+    const h = rows[0];
+    const ci = {
+      name: detectTicketCol(h, 'name'), grade: detectTicketCol(h, 'grade'),
+      campus: detectTicketCol(h, 'campus'), groups: detectTicketCol(h, 'groups'),
+      cardId: detectTicketCol(h, 'cardId'), studentId: detectTicketCol(h, 'studentId'),
+    };
+    const list = [];
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row || row.every(c => !cellStr(c))) continue;
+      const get = (idx) => idx >= 0 ? cellStr(row[idx]) : '';
+      list.push({
+        name: get(ci.name), grade: get(ci.grade), campus: get(ci.campus),
+        groups: get(ci.groups), cardId: get(ci.cardId), studentId: get(ci.studentId),
+      });
+    }
+    return list;
+  }
+  return null;
+}
+
+function doTicketMatch() {
+  const roster = getTicketRoster();
+  if (!roster || !roster.length) { toast('请先上传本地报名名单 Excel'); return null; }
+  if (!ticketAccountWB) { toast('请先上传本地账号密码表 Excel'); return null; }
+  const acc = parseAccountTable(ticketAccountWB);
+  if (acc.cols.name < 0 && acc.cols.account < 0) { toast('账号密码表未识别到「姓名」或「账号」列'); return null; }
+
+  const byName = new Map(), bySid = new Map(), byCard = new Map();
+  acc.list.forEach(a => {
+    const n = normName(a.name);
+    if (n) { if (!byName.has(n)) byName.set(n, []); byName.get(n).push(a); }
+    if (a.studentId) { if (!bySid.has(a.studentId)) bySid.set(a.studentId, []); bySid.get(a.studentId).push(a); }
+    if (a.cardId) { if (!byCard.has(a.cardId)) byCard.set(a.cardId, []); byCard.get(a.cardId).push(a); }
+  });
+
+  const baseYear = parseInt($('ticketBaseYear').value, 10) || currentYear;
+  const defLoc = cellStr($('ticketLocation').value);
+  const defGroup = cellStr($('ticketGroupLabel').value);
+  const list = [], missing = [], duplicateNames = [], usedAcc = new Set();
+
+  roster.forEach(p => {
+    let cand = null;
+    const n = normName(p.name);
+    if (n && byName.has(n)) {
+      const arr = byName.get(n).filter(a => !usedAcc.has(a.row));
+      if (arr.length) { cand = arr[0]; if (arr.length > 1) duplicateNames.push(p.name); }
+    }
+    if (!cand && p.studentId && bySid.has(p.studentId)) {
+      const arr = bySid.get(p.studentId).filter(a => !usedAcc.has(a.row));
+      if (arr.length) cand = arr[0];
+    }
+    if (!cand && p.cardId && byCard.has(p.cardId)) {
+      const arr = byCard.get(p.cardId).filter(a => !usedAcc.has(a.row));
+      if (arr.length) cand = arr[0];
+    }
+    if (!cand) { missing.push(p.name || '(无名)'); return; }
+    usedAcc.add(cand.row);
+    // 校区：跟随名单，名单没有则用默认值
+    let loc = p.campus ? (p.campus.includes('九龙湖') ? '九龙湖校区' : p.campus.includes('四牌楼') ? '四牌楼校区' : p.campus) : defLoc;
+    list.push({
+      name: p.name || cand.name,
+      grade: formatGrade(p.grade, baseYear),
+      cardId: p.cardId,
+      location: loc,
+      account: cand.account, password: cand.password, code: cand.code,
+    });
+  });
+  const unused = acc.list.filter(a => !usedAcc.has(a.row));
+  return { list, missing, duplicateNames, unused, rosterCount: roster.length,
+    title: cellStr($('ticketTitle').value), group: defGroup, notice: cellStr($('ticketNotice').value), sign: cellStr($('ticketSign').value) };
+}
+
+function renderTicketReport(res) {
+  const el = $('ticketReport');
+  el.classList.remove('hidden');
+  let h = `<div><span class="rpt-ok">✓ 可生成 ${res.list.length}</span> / 名单共 ${res.rosterCount} 人</div>`;
+  if (res.missing.length) h += `<div class="rpt-warn">⚠ 未匹配账号（${res.missing.length}）：${res.missing.slice(0,20).map(n=>esc(n)).join('、')}${res.missing.length>20?'…':''}</div>`;
+  if (res.duplicateNames.length) h += `<div class="rpt-warn">⚠ 姓名重复（取首条）：${res.duplicateNames.slice(0,20).map(n=>esc(n)).join('、')}</div>`;
+  if (res.unused.length) h += `<div class="rpt-warn">⚠ 账号表未使用 ${res.unused.length} 条</div>`;
+  if (res.list.length) h += `<div class="rpt-preview">${res.list.slice(0,2).map(p=>`${p.name} · ${p.grade} · ${p.location} · 账号${p.account}`).join('\n')}</div>`;
+  h += `<div class="ticket-hint">版式：A4 横向，每页 4 张。点「生成准考证」后，再点「下载 PDF」即可直接保存。</div>`;
+  el.innerHTML = h;
+}
+
+// 生成准考证 HTML（每页 4 张，2×2）
+function renderTicketCards(res) {
+  const area = $('ticketPrintArea');
+  area.innerHTML = '';
+  const escT = xmlEsc;
+  let html = '';
+  const perPage = 4;
+  for (let i = 0; i < res.list.length; i += perPage) {
+    const pageItems = res.list.slice(i, i + perPage);
+    html += '<div class="tk-page"><div class="tk-grid">';
+    pageItems.forEach(p => {
+      // 样例版式：第一行赛事名，第二行组别名
+      const titleHtml = `<div>${escT(res.title)}</div>` + (res.group ? `<div>${escT(res.group)}</div>` : '');
+      html += `<div class="tk-card">
+        <img class="tk-logo" src="ticket_logo.png" alt="">
+        <div class="tk-title">${titleHtml}</div>
+        <div class="tk-divider"></div>
+        <div class="tk-col tk-col-left">
+          <div class="tk-line"><span class="tk-label">姓名：</span>${escT(p.name)}</div>
+          <div class="tk-line"><span class="tk-label">年级：</span>${escT(p.grade)}</div>
+          <div class="tk-line"><span class="tk-label">一卡通号：</span>${escT(p.cardId)}</div>
+          <div class="tk-line"><span class="tk-label">参赛地点：</span>${escT(p.location)}</div>
+        </div>
+        <div class="tk-col tk-col-right">
+          <div class="tk-line"><span class="tk-label">账号：</span><span class="tk-val">${escT(p.account)}</span></div>
+          <div class="tk-line"><span class="tk-label">密码：</span><span class="tk-val">${escT(p.password)}</span></div>
+          <div class="tk-line"><span class="tk-label">准入码：</span><span class="tk-val">${escT(p.code)}</span></div>
+        </div>
+        <div class="tk-foot"><span>${escT(res.notice)}</span><span>${escT(res.sign)}</span></div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+  area.innerHTML = html;
+}
+
+// 绑定准考证事件
+$('menuTicket').addEventListener('click', () => {
+  $('ticketModal').classList.remove('hidden');
+  $('ticketReport').classList.add('hidden');
+  $('ticketGenerateBtn').disabled = true;
+  $('ticketPrintBtn').disabled = true;
+  ticketData = null;
+});
+$('ticketClose').addEventListener('click', () => $('ticketModal').classList.add('hidden'));
+$('ticketModal').addEventListener('click', (e) => { if (e.target === $('ticketModal')) $('ticketModal').classList.add('hidden'); });
+$('ticketRosterBrowse').addEventListener('click', () => $('ticketRosterFile').click());
+$('ticketAccountBrowse').addEventListener('click', () => $('ticketAccountFile').click());
+$('ticketRosterFile').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  $('ticketRosterPath').value = f.name;
+  const r = new FileReader();
+  r.onload = (ev) => { try { ticketRosterWB = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); toast('报名名单已读取'); } catch(err){ toast('读取失败'); } };
+  r.readAsArrayBuffer(f);
+});
+$('ticketAccountFile').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  $('ticketAccountPath').value = f.name;
+  const r = new FileReader();
+  r.onload = (ev) => { try { ticketAccountWB = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); toast('账号密码表已读取'); } catch(err){ toast('读取失败'); } };
+  r.readAsArrayBuffer(f);
+});
+function runTicketMatch() {
+  const btn = $('ticketPreviewBtn');
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '检查中…';
+  const report = $('ticketReport');
+  report.classList.remove('hidden');
+  report.innerHTML = '<div style="color:var(--text-sub);">⏳ 正在匹配数据…</div>';
+  setTimeout(() => {
+    try {
+      ticketData = doTicketMatch();
+      if (ticketData) {
+        renderTicketReport(ticketData);
+        $('ticketGenerateBtn').disabled = ticketData.list.length === 0;
+        $('ticketPrintBtn').disabled = true;
+      }
+    } catch (e) {
+      console.error('准考证匹配失败：', e);
+      report.innerHTML = '<div class="rpt-err">✗ 出错：' + esc(e && e.message ? e.message : e) + '</div>';
+    } finally { btn.disabled = false; btn.textContent = old; }
+  }, 50);
+}
+$('ticketPreviewBtn').addEventListener('click', runTicketMatch);
+$('ticketGenerateBtn').addEventListener('click', () => {
+  if (!ticketData) ticketData = doTicketMatch();
+  if (!ticketData || !ticketData.list.length) { toast('没有可生成的准考证'); return; }
+  renderTicketCards(ticketData);
+  $('ticketPrintBtn').disabled = false;
+  toast(`已生成 ${ticketData.list.length} 张准考证，共 ${Math.ceil(ticketData.list.length/4)} 页，可点「下载 PDF」`);
+});
+$('ticketPrintBtn').addEventListener('click', async () => {
+  if (!ticketData || !ticketData.list.length) { toast('请先生成准考证'); return; }
+  const btn = $('ticketPrintBtn');
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '正在生成 PDF…';
+  const area = $('ticketPrintArea');
+  try {
+    const jspdfOK = window.jspdf && typeof window.jspdf.jsPDF === 'function';
+    if (typeof html2canvas === 'undefined' || !jspdfOK) {
+      toast('PDF 组件未加载，请刷新页面重试（html2canvas=' + (typeof html2canvas) + ', jsPDF=' + jspdfOK + '）'); return;
+    }
+    // html2canvas 需要元素可见，临时显示（放到屏幕外而非 display:none）
+    area.style.display = 'block';
+    area.style.position = 'fixed';
+    area.style.left = '-10000px';
+    area.style.top = '0';
+    await new Promise(r => setTimeout(r, 100)); // 等图片加载与布局
+
+    const pages = area.querySelectorAll('.tk-page');
+    const { jsPDF: JsPDF } = window.jspdf;
+    const pdf = new JsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pw = 297, ph = 210;
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage('a4', 'landscape');
+      const canvas = await html2canvas(pages[i], { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      const img = canvas.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(img, 'JPEG', 0, 0, pw, ph);
+      btn.textContent = `生成 PDF… ${i + 1}/${pages.length}`;
+      await new Promise(r => setTimeout(r, 0));
+    }
+    const prefix = cellStr($('badgeNamePrefix').value) || '准考证';
+    pdf.save(prefix + '_准考证_' + ticketData.list.length + '人.pdf');
+    toast('PDF 已生成并开始下载');
+  } catch (e) {
+    console.error('生成PDF失败：', e);
+    toast('生成 PDF 失败：' + (e && e.message ? e.message : e));
+  } finally {
+    // 恢复隐藏
+    area.style.display = '';
+    area.style.position = '';
+    area.style.left = '';
+    area.style.top = '';
+    btn.disabled = false; btn.textContent = old;
+  }
+});
+
+// ============ 签到表批量生成 ============
+let signRosterWB = null;
+let signData = null;
+
+function getSignRoster() {
+  if (signRosterWB) {
+    const rows = sheetRows(signRosterWB);
+    if (!rows.length) return [];
+    const h = rows[0];
+    const ni = detectTicketCol(h, 'name'), si = detectTicketCol(h, 'studentId');
+    const list = [];
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row || row.every(c => !cellStr(c))) continue;
+      list.push({ name: ni >= 0 ? cellStr(row[ni]) : '', studentId: si >= 0 ? cellStr(row[si]) : '' });
+    }
+    return list;
+  }
+  return null;
+}
+
+function runSignMatch() {
+  const btn = $('signPreviewBtn');
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '检查中…';
+  const report = $('signReport');
+  report.classList.remove('hidden');
+  report.innerHTML = '<div style="color:var(--text-sub);">⏳ 正在读取名单…</div>';
+  setTimeout(() => {
+    try {
+      const roster = getSignRoster();
+      if (!roster || !roster.length) { toast('请先上传本地报名名单 Excel'); report.innerHTML='<div class="rpt-err">请先上传本地报名名单 Excel</div>'; return; }
+      const valid = roster.filter(p => p.name || p.studentId);
+      const noName = roster.filter(p => !p.name).length;
+      const rowsPerCol = 20;  // 固定每栏20行
+      const perPage = rowsPerCol * 2;
+      signData = { list: valid, rowsPerCol, perPage, pages: Math.ceil(valid.length / perPage) };
+      let h = `<div><span class="rpt-ok">✓ 共 ${valid.length} 人</span>，每页 ${perPage} 人，合计 ${signData.pages} 页</div>`;
+      if (noName) h += `<div class="rpt-warn">⚠ ${noName} 行缺少姓名（已保留学号）</div>`;
+      h += `<div class="rpt-preview">${valid.slice(0,3).map((p,i)=>`${i+1}. ${p.name} · ${p.studentId}`).join('\n')}</div>`;
+      report.innerHTML = h;
+      $('signGenerateBtn').disabled = false;
+      $('signDownloadBtn').disabled = true;
+    } catch (e) {
+      console.error('签到表检查失败：', e);
+      report.innerHTML = '<div class="rpt-err">✗ 出错：' + esc(e && e.message ? e.message : e) + '</div>';
+    } finally { btn.disabled = false; btn.textContent = old; }
+  }, 50);
+}
+
+// 渲染签到表 HTML（A4纵向，左右两栏）
+function renderSignSheets(data) {
+  const area = $('signPrintArea');
+  area.innerHTML = '';
+  const escT = xmlEsc;
+  const title = cellStr($('signTitle').value) || '签到表';
+  const subtitle = cellStr($('signSubtitle').value);
+  const rpc = data.rowsPerCol;
+  let html = '';
+  for (let pg = 0; pg < data.pages; pg++) {
+    const slice = data.list.slice(pg * data.perPage, (pg + 1) * data.perPage);
+    // 分成左右两栏
+    const left = slice.slice(0, rpc);
+    const right = slice.slice(rpc, rpc * 2);
+    const buildCol = (items, isRight) => {
+      let rows = '';
+      // 有多少人生成多少行，不预留空格
+      for (let i = 0; i < items.length; i++) {
+        const p = items[i];
+        const no = pg * data.perPage + (isRight ? rpc : 0) + i + 1;
+        rows += `<tr><td class="sg-no">${no}</td><td class="sg-name">${escT(p.name)}</td><td class="sg-sid">${escT(p.studentId)}</td><td class="sg-sign"></td></tr>`;
+      }
+      const head = `<tr><th class="sg-no">序号</th><th class="sg-name">姓名</th><th class="sg-sid">学号</th><th class="sg-sign">签名</th></tr>`;
+      return `<table class="sg-table"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+    };
+    html += `<div class="sg-page">
+      <div class="sg-title">${escT(title)}</div>
+      ${subtitle ? `<div class="sg-subtitle">${escT(subtitle)}</div>` : ''}
+      <div class="sg-cols">${buildCol(left, false)}${buildCol(right, true)}</div>
+    </div>`;
+  }
+  area.innerHTML = html;
+}
+
+// 签到表事件绑定
+$('menuSign').addEventListener('click', () => {
+  $('signModal').classList.remove('hidden');
+  $('signReport').classList.add('hidden');
+  $('signGenerateBtn').disabled = true;
+  $('signDownloadBtn').disabled = true;
+  signData = null;
+});
+$('signClose').addEventListener('click', () => $('signModal').classList.add('hidden'));
+$('signModal').addEventListener('click', (e) => { if (e.target === $('signModal')) $('signModal').classList.add('hidden'); });
+$('signRosterBrowse').addEventListener('click', () => $('signRosterFile').click());
+$('signRosterFile').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  $('signRosterPath').value = f.name;
+  const r = new FileReader();
+  r.onload = (ev) => { try { signRosterWB = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); toast('报名名单已读取'); } catch(err){ toast('读取失败'); } };
+  r.readAsArrayBuffer(f);
+});
+$('signPreviewBtn').addEventListener('click', runSignMatch);
+$('signGenerateBtn').addEventListener('click', () => {
+  if (!signData) runSignMatch();
+  setTimeout(() => {
+    if (!signData) { toast('请先检查名单'); return; }
+    renderSignSheets(signData);
+    $('signDownloadBtn').disabled = false;
+    toast(`已生成 ${signData.list.length} 人签到表，共 ${signData.pages} 页`);
+  }, 120);
+});
+$('signDownloadBtn').addEventListener('click', async () => {
+  if (!signData) { toast('请先生成签到表'); return; }
+  const btn = $('signDownloadBtn');
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '正在生成 PDF…';
+  const area = $('signPrintArea');
+  try {
+    const jspdfOK = window.jspdf && typeof window.jspdf.jsPDF === 'function';
+    if (typeof html2canvas === 'undefined' || !jspdfOK) { toast('PDF 组件未加载，请刷新重试'); return; }
+    area.style.display = 'block';
+    area.style.position = 'fixed';
+    area.style.left = '-10000px';
+    area.style.top = '0';
+    await new Promise(r => setTimeout(r, 100));
+    const pages = area.querySelectorAll('.sg-page');
+    const { jsPDF: JsPDF } = window.jspdf;
+    const pdf = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage('a4', 'portrait');
+      const canvas = await html2canvas(pages[i], { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      const img = canvas.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+      btn.textContent = `生成 PDF… ${i + 1}/${pages.length}`;
+      await new Promise(r => setTimeout(r, 0));
+    }
+    pdf.save('签到表_' + signData.list.length + '人.pdf');
+    toast('签到表 PDF 已生成并开始下载');
+  } catch (e) {
+    console.error('生成签到表PDF失败：', e);
+    toast('生成失败：' + (e && e.message ? e.message : e));
+  } finally {
+    area.style.display = ''; area.style.position = ''; area.style.left = ''; area.style.top = '';
+    btn.disabled = false; btn.textContent = old;
+  }
+});
+
+// ---------- 初始化 ----------
+(function init() {
+  $('yearInput').value = 2026;
+  currentYear = 2026;
+
+  // 恢复上次会话数据
+  if (loadState()) {
+    $('yearInput').value = currentYear;
+    registerLoaded = allPeople.length > 0;
+    toast('已恢复上次的筛选数据');
+  }
+  rebuildState();
+  render();
+  updateButtons();
+})();
 </script>
+
 </body>
 </html>

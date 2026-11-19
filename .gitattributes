@@ -1,0 +1,14 @@
+# 统一换行：源码一律 LF，避免 Windows/macOS 提交互相污染
+* text=auto eol=lf
+
+# 二进制资源，禁止任何文本转换
+*.docx binary
+*.xlsx binary
+*.gz   binary
+*.png  binary
+*.ico  binary
+*.jpg  binary
+*.pdf  binary
+
+# 第三方压缩库不做 diff
+*.min.js linguist-generated=true -diff

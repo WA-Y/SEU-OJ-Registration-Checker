@@ -1,7 +1,10 @@
 # SEU-OJ 报名核验 —— 运行依赖
-
-# 读取/写出 Excel（报名表识别、结果导出）
-openpyxl>=3.1.0
-
-# 说明：本项目仅依赖 openpyxl 一个第三方库。
-# 后端使用 Python 标准库 http.server，前端为纯 HTML/JS，无需其他依赖。
+#
+# 本体不需要任何第三方库：本地服务（src/local_server.py）与数据抓取
+# （src/oierdb_fetcher.py）只用 Python 标准库；前端依赖已随仓库分发在 web/ 下
+# （xlsx / jszip / html2canvas / jsPDF），无需联网 CDN。
+#
+# 仅当你要运行 legacy/ 里的 v1 服务端实现（服务端读表 / 匹配 / 导出）时，
+# 才需要安装下面这个依赖（取消注释）：
+#
+# openpyxl>=3.1.0

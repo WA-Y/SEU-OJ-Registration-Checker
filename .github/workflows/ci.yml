@@ -18,6 +18,7 @@ jobs:
         with:
           python-version: "3.11"
 
+      # 本体零第三方依赖，这一步只用于确认 requirements.txt 可用
       - name: 安装依赖
         run: |
           python -m pip install --upgrade pip
@@ -27,6 +28,16 @@ jobs:
         run: |
           python -m py_compile src/*.py run.py
 
-      - name: 导入冒烟测试（验证模块可正常导入）
+      - name: 导入冒烟测试（验证本体模块可正常导入）
         run: |
-          cd src && python -c "import config, excel_reader, matcher, oierdb_fetcher, output, state, server; print('所有模块导入成功')"
+          cd src && python -c "import config, oierdb_fetcher, local_server; print('所有模块导入成功')"
+
+      - name: 前端资源完整性检查
+        run: |
+          for f in web/index.html web/badge_template.docx web/ticket_logo.png \
+                   web/xlsx.full.min.js web/jszip.min.js web/html2canvas.min.js \
+                   web/jspdf.umd.min.js web/data/oierdb_index.json.gz \
+                   web/data/oierdb_detail.json.gz assets/contests.json; do
+            test -f "$f" || { echo "缺少文件: $f"; exit 1; }
+          done
+          echo "前端资源齐全"

@@ -34,21 +34,26 @@
 ## 开发环境
 
 ```bash
-pip install -r requirements.txt
-python run.py
+python run.py          # 本体零第三方依赖，直接跑
 ```
+
+改前端（`web/index.html`）后刷新浏览器即可，本地服务对 HTML 不缓存。改动 `src/oierdb_fetcher.py` 想验证抓取流程时，可在 `src/` 下执行 `python oierdb_fetcher.py`。
 
 ## 代码风格
 
-- 遵循 [PEP 8](https://pep8.org/)
-- 前端 JS 保持与现有代码风格一致（驼峰命名、4 空格缩进）
+- Python 遵循 [PEP 8](https://pep8.org/)
+- 前端 JS 保持与现有代码风格一致（驼峰命名、2 空格缩进）
 - 注释用中文说明业务逻辑，方便校内同学理解
 
 ## 目录约定
 
-- `src/` —— Python 后端逻辑
-- `web/` —— 前端页面（纯 HTML/JS）
+- `src/` —— 本地服务与数据抓取（零第三方依赖）
+- `web/` —— 前端页面与静态资源（页面里包含核验、导出、台签、准考证、签到表全部逻辑）
+- `assets/` —— 随仓库分发的静态元数据（比赛列表等）
+- `legacy/` —— v1 服务端实现，**不参与运行**，只作参考
 - `data/`、`output/` —— 运行时生成，**勿提交**（已在 .gitignore 中忽略）
+
+> 修改台签版式时注意：`web/badge_template.docx` 里 `PLACE_HOLDER_1~6` 分别是 姓名 / 账号 / 密码 / 准入码 / 标题上行 / 标题下行，且 Word 会在 `mc:AlternateContent` 的 DrawingML 与 VML 备份里各存一份，替换必须全局进行。
 
 ## 数据隐私提醒
 

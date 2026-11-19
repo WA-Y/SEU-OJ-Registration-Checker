@@ -17,6 +17,7 @@ records 字段编码（每条记录用 "/" 分隔，字段用 ":" 分隔）：
 本模块额外保存每个获奖人的【完整获奖记录】（比赛名、奖项、排名、分数、年份、uid），
 供二级界面展示"该人在 OIerDb 的具体获奖情况"。
 """
+import gzip
 import json
 import os
 import urllib.request
@@ -27,7 +28,10 @@ from config import (
     OIERDB_JSON_PATH,
     OIERDB_DETAIL_JSON_PATH,
     CONTESTS_JSON_PATH,
+    CONTESTS_JSON_PATH_FALLBACK,
     SCHOOL_TXT_PATH,
+    WEB_INDEX_GZ,
+    WEB_DETAIL_GZ,
     OIERDB_RESULT_INFO_URL,
     OIERDB_RESULT_URLS,
 )
@@ -69,12 +73,46 @@ def _http_get(url, timeout=60, referer=None):
         return resp.read()
 
 
-def _download_result_txt():
+def _download_bytes(url, timeout=300, referer=None, progress=None):
+    """流式下载并按 2MB 粒度回报进度，避免大文件下载时界面像卡死。"""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        "Accept": "*/*",
+    }
+    if referer:
+        headers["Referer"] = referer
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        try:
+            total = int(resp.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            total = 0
+        buf = bytearray()
+        last_report = 0
+        while True:
+            chunk = resp.read(256 * 1024)
+            if not chunk:
+                break
+            buf.extend(chunk)
+            if progress and len(buf) - last_report >= 2 * 1024 * 1024:
+                last_report = len(buf)
+                got = len(buf) / 1048576.0
+                if total:
+                    progress("正在下载 result.txt… %.1f / %.1f MB" % (got, total / 1048576.0))
+                else:
+                    progress("正在下载 result.txt… %.1f MB" % got)
+        return bytes(buf)
+
+
+def _download_result_txt(progress=None):
     """
     获取 result.txt 的下载地址并下载到本地。
     返回本地文件路径。
     """
     # 1. 获取 result.info.json
+    if progress:
+        progress("正在获取数据版本…")
     try:
         info = json.loads(_http_get(OIERDB_RESULT_INFO_URL).decode("utf-8"))
     except Exception as e:
@@ -92,7 +130,7 @@ def _download_result_txt():
         try:
             # CDN 源加 Referer 以绕过部分反爬
             referer = "https://oier.baoshuo.dev/" if "cdn" in url or "cos" in url else None
-            data = _http_get(url, timeout=300, referer=referer)
+            data = _download_bytes(url, timeout=300, referer=referer, progress=progress)
             if not data or len(data) < 1000:
                 raise RuntimeError(f"下载内容过小（{len(data)} 字节），疑似被拦截")
             with open(RAW_TXT_PATH, "wb") as f:
@@ -107,9 +145,12 @@ def _download_result_txt():
 
 def load_contests():
     """加载比赛列表，返回 dict: contest_id(int) -> {name, type, year, full_score}。"""
-    if not os.path.exists(CONTESTS_JSON_PATH):
+    path = CONTESTS_JSON_PATH
+    if not os.path.exists(path):
+        path = CONTESTS_JSON_PATH_FALLBACK
+    if not os.path.exists(path):
         return {}
-    with open(CONTESTS_JSON_PATH, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8") as f:
         contests = json.load(f)
     result = {}
     for i, c in enumerate(contests):
@@ -321,6 +362,61 @@ def ensure_detail_loaded(force=False):
         with open(OIERDB_JSON_PATH, "w", encoding="utf-8") as f:
             json.dump(people, f, ensure_ascii=False)
     return build_name_detail_index(people)
+
+
+def _write_gz(path, obj):
+    """把对象写成 gzip 压缩的 JSON（前端用 DecompressionStream 直接解压）。"""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with gzip.open(tmp, "wt", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
+    os.replace(tmp, path)
+
+
+def download_and_parse(progress=None):
+    """
+    强制下载最新 result.txt 并解析，返回获奖人列表（同时写入 data/oierdb.json）。
+
+    progress: 可选回调 progress(str)，用于把进度推给前端。
+    """
+    def _p(msg):
+        if progress:
+            progress(msg)
+
+    _p("正在获取数据版本…")
+    _download_result_txt(progress=progress)
+    _p("正在解析 result.txt（约 11 万条，需要几十秒）…")
+    people = parse_result_txt()
+    if not people:
+        raise RuntimeError("解析 result.txt 得到 0 条记录，请检查数据源")
+    with open(OIERDB_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(people, f, ensure_ascii=False)
+    return people
+
+
+def export_web_data(people=None, progress=None):
+    """
+    生成前端直接读取的两份快照：
+      web/data/oierdb_index.json.gz   name -> [{uid, grade}]
+      web/data/oierdb_detail.json.gz  uid  -> [获奖记录]
+    返回 (姓名数, uid 数)。
+    """
+    if people is None:
+        people = load_oierdb_json()
+    if not people:
+        raise RuntimeError("没有可用的 OIerDb 数据，请先执行更新")
+
+    if progress:
+        progress("正在生成前端数据快照…")
+    index = build_oierdb_index(people)
+    detail = {}
+    for p in people:
+        uid = p.get("uid")
+        if uid:
+            detail[uid] = p.get("records", [])
+    _write_gz(WEB_INDEX_GZ, index)
+    _write_gz(WEB_DETAIL_GZ, detail)
+    return len(index), len(detail)
 
 
 if __name__ == "__main__":
