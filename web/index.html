@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>东南大学OJ比赛报名校对核验</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e2e5ea;
+    --text: #1f2329;
+    --text-sub: #8a919c;
+    --primary: #4b6bfb;
+    --primary-hover: #3a56d8;
+    --danger: #e5484d;
+    --danger-hover: #c93a3f;
+    --success: #30a46c;
+    --success-hover: #258a58;
+    --warn: #f5a623;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  /* 整体布局：左侧固定侧边栏 + 右侧内容区 */
+  body { display: flex; }
+  .sidebar {
+    width: 240px; min-width: 240px; height: 100vh;
+    background: var(--card); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; flex-shrink: 0;
+  }
+  .sidebar .logo {
+    padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+  }
+  .sidebar .logo .logo-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sidebar .logo .logo-img {
+    width: 46px; height: 46px; border-radius: 50%;
+    flex-shrink: 0; object-fit: cover;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  }
+  .sidebar .logo .logo-text { min-width: 0; }
+  .sidebar .logo .title-main { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.25; letter-spacing: 1px; }
+  .sidebar .logo .sub { color: var(--text-sub); font-size: 12px; line-height: 1.4; margin-top: 3px; }
+
+  .sidebar .menu {
+    flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .menu-label {
+    font-size: 11px; color: var(--text-sub); padding: 8px 10px 4px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .menu-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    color: var(--text); font-size: 14px; font-weight: 500;
+    transition: background .12s; user-select: none;
+  }
+  .menu-item:hover { background: #f0f1f3; }
+  .menu-item.active { background: #e8f0fe; color: var(--primary); }
+  .menu-item .badge {
+    margin-left: auto; background: #eef0f3; color: var(--text-sub);
+    border-radius: 10px; padding: 0 9px; font-size: 12px; min-width: 20px; text-align: center;
+  }
+  .menu-item.active .badge { background: #d6e3ff; color: var(--primary); }
+  .menu-item .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--text-sub);
+  }
+  .menu-item.pending .dot { background: var(--warn); }
+  .menu-item.passed .dot { background: var(--success); }
+  .menu-item.draft .dot { background: var(--danger); }
+
+  .sidebar .ops {
+    padding: 14px 16px; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .sidebar .ops .ops-title { font-size: 11px; color: var(--text-sub); text-transform: uppercase; letter-spacing: .5px; }
+
+  .content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* 顶部工具条 */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  header h1 { font-size: 16px; font-weight: 600; display: none; }
+  .year-box { display: flex; align-items: center; gap: 8px; }
+  .year-box label { font-size: 13px; color: var(--text-sub); }
+  .year-box input {
+    width: 80px; padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 14px;
+  }
+  .btn {
+    padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 500; transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: var(--danger-hover); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: var(--success-hover); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: #f0f1f3; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  .path-input {
+    display: flex; gap: 8px; padding: 0 20px; align-items: center; flex: 1; min-width: 260px;
+  }
+  .path-input input {
+    flex: 1; padding: 7px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 13px;
+  }
+
+  .search-box {
+    display: flex; gap: 4px; align-items: center;
+  }
+  .search-box input {
+    width: 180px; padding: 7px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 13px;
+  }
+  .search-box input:focus { border-color: var(--primary); outline: none; }
+
+  /* 步骤条折叠为顶部精简提示 */
+  .steps { display: none; }
+
+  /* 主内容区：两个栏目分列 */
+  .main {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    padding: 16px 20px; flex: 1; min-height: 0;
+  }
+  .main.single { grid-template-columns: 1fr; }
+  .col {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); display: flex; flex-direction: column;
+    min-height: 0; overflow: hidden;
+  }
+  .col-head {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .col-head h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .col-head h2::before {
+    content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--warn);
+  }
+  #rightCol .col-head h2::before { background: var(--success); }
+  #draftCol .col-head h2::before { background: var(--danger); }
+  .col-head .count {
+    background: #eef0f3; border-radius: 10px; padding: 2px 10px;
+    font-size: 12px; color: var(--text-sub);
+  }
+  .col-body { overflow-y: auto; flex: 1; padding: 10px; }
+
+  /* 已通过栏的分组展示 */
+  .group-block { margin-bottom: 14px; }
+  .group-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; margin-bottom: 6px;
+    background: #f7f8fa; border-radius: 6px;
+    border-left: 3px solid var(--success);
+  }
+  .group-title { font-weight: 600; font-size: 13px; }
+  .group-count { color: var(--text-sub); font-size: 12px; }
+  .group-body { padding-left: 4px; }
+  .group-empty { color: var(--text-sub); font-size: 12px; padding: 4px 8px; }
+
+  /* 已通过栏：4 个分组横向分列展示 */
+  .col-body-cols {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+    overflow-x: auto;
+  }
+  .col-body-cols .group-block {
+    margin-bottom: 0;
+    min-width: 0;
+    display: flex; flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .col-body-cols .group-head {
+    margin-bottom: 0;
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+    background: #f7f8fa;
+    border-radius: 0;
+    flex-shrink: 0;
+  }
+  .col-body-cols .group-body {
+    padding: 8px;
+    overflow-y: auto;
+    max-height: calc(100vh - 260px);
+  }
+
+
+  .person-card {
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+    margin-bottom: 8px; cursor: pointer; transition: all .12s; position: relative;
+    user-select: text;
+  }
+  .person-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+  .person-card.selected { border-color: var(--primary); background: #f0f4ff; }
+  .person-card .name-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .person-card .name { font-size: 15px; font-weight: 600; }
+  .person-card .tag {
+    font-size: 11px; padding: 1px 7px; border-radius: 4px;
+  }
+  .tag-group { background: #e8f0fe; color: #3a56d8; }
+  .tag-campus { background: #e6f7ef; color: #258a58; }
+  .tag-suspect { background: #fff4e0; color: #c77a00; }
+  .person-card .name-actions {
+    margin-left: auto; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .person-card .name-actions .btn { padding: 3px 10px; font-size: 12px; }
+  .person-card .info { color: var(--text-sub); font-size: 12px; line-height: 1.6; }
+  .person-card .info b { color: var(--text); font-weight: 500; }
+  .person-card .actions { margin-top: 8px; display: flex; gap: 6px; }
+
+  /* 待确认栏的卡片放大（仅左侧列表） */
+  #leftBody .person-card {
+    padding: 14px 16px; border-radius: 10px; margin-bottom: 10px;
+  }
+  #leftBody .person-card .name { font-size: 17px; }
+  #leftBody .person-card .tag { font-size: 12px; padding: 2px 9px; }
+  #leftBody .person-card .name-actions { gap: 8px; }
+  #leftBody .person-card .name-actions .btn { padding: 5px 12px; font-size: 12px; }
+
+  .empty { color: var(--text-sub); text-align: center; padding: 40px 0; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #333; color: #fff; padding: 10px 20px; border-radius: 8px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .3s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  .modal-mask {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center; z-index: 50;
+  }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 24px; width: 460px;
+    max-width: 90vw; max-height: 80vh; overflow-y: auto;
+  }
+  .modal h3 { margin-bottom: 12px; }
+  .hidden { display: none !important; }
+  .loading { color: var(--text-sub); padding: 8px 0; }
+
+  /* 二级详情面板 */
+  .detail-modal { width: 760px; max-width: 94vw; }
+  .detail-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .detail-head .meta { color: var(--text-sub); font-size: 12px; margin-top: 4px; }
+  .detail-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 500;
+    padding: 6px 12px; border: 1px solid var(--primary); border-radius: 6px;
+    white-space: nowrap;
+  }
+  .detail-link:hover { background: #f0f4ff; }
+  .detail-person {
+    border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+  }
+  .detail-person-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: #f7f8fa; border-bottom: 1px solid var(--border);
+  }
+  .detail-person-head .uid { color: var(--text-sub); font-size: 12px; }
+  .rec-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rec-table th {
+    text-align: left; padding: 8px 12px; background: #fbfbfc;
+    color: var(--text-sub); font-weight: 500; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .rec-table td {
+    padding: 7px 12px; border-bottom: 1px solid #f0f1f3; vertical-align: middle;
+  }
+  .rec-table tr:last-child td { border-bottom: none; }
+  .rec-table .contest-name { font-weight: 500; }
+  .rec-table .rec-year { color: var(--text-sub); }
+  .award-badge {
+    display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 12px;
+    font-weight: 500; white-space: nowrap;
+  }
+  .award-gold { background: #fff4e0; color: #c77a00; }
+  .award-silver { background: #f0f1f3; color: #5c6570; }
+  .award-bronze { background: #f7e8dd; color: #a05c2a; }
+  .award-first { background: #e8f0fe; color: #3a56d8; }
+  .award-other { background: #f0f1f3; color: #5c6570; }
+  .award-intl { background: #fbe8f0; color: #c0356b; }
+  .detail-empty { color: var(--text-sub); text-align: center; padding: 24px 0; }
+  .detail-warn {
+    background: #fff8e6; border: 1px solid #f5d98a; border-radius: 6px;
+    padding: 10px 14px; font-size: 12px; color: #8a6d1a; margin-bottom: 12px;
+  }
+
+  /* 详情：报名人完整信息卡片 */
+  .detail-info-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 14px;
+    background: linear-gradient(180deg, #f7f9fc, #fff);
+  }
+  .detail-info-name {
+    font-size: 18px; font-weight: 700; margin-bottom: 10px;
+    color: var(--text);
+  }
+  .detail-info-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 20px;
+  }
+  .info-item { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+  .info-label {
+    color: var(--text-sub); font-size: 12px; flex-shrink: 0; min-width: 44px;
+  }
+  .info-value { color: var(--text); font-weight: 500; }
+
+
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-row">
+      <img class="logo-img" src="seu_logo.png" alt="东南大学校徽">
+      <div class="logo-text">
+        <div class="title-main">东南大学</div>
+        <div class="sub">OJ比赛报名校对核验</div>
+      </div>
+    </div>
+  </div>
+  <nav class="menu">
+    <div class="menu-label">名单</div>
+    <div class="menu-item pending active" data-view="pending" id="menuPending">
+      <span class="dot"></span>
+      <span>待确认（可能获奖）</span>
+      <span class="badge" id="leftCount">0</span>
+    </div>
+    <div class="menu-item passed" data-view="passed" id="menuPassed">
+      <span class="dot"></span>
+      <span>已通过 / 已确认</span>
+      <span class="badge" id="rightCount">0</span>
+    </div>
+    <div class="menu-item draft" data-view="draft" id="menuDraft">
+      <span class="dot"></span>
+      <span>草稿箱（已取消）</span>
+      <span class="badge" id="draftCount">0</span>
+    </div>
+  </nav>
+  <div class="ops">
+    <div class="ops-title">快捷操作</div>
+    <button class="btn btn-primary" id="loadBtn" style="width:100%;">加载报名表</button>
+    <button class="btn btn-ghost" id="fetchBtn" disabled style="width:100%;">爬取 OIerDb 数据</button>
+    <button class="btn btn-ghost" id="matchBtn" disabled style="width:100%;">筛选匹配</button>
+    <button class="btn btn-success" id="exportBtn" disabled style="width:100%;">导出结果</button>
+    <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+    <button class="btn btn-ghost" id="undoBtn" style="width:100%;">↩ 回退上一次操作</button>
+    <button class="btn btn-danger" id="resetBtn" style="width:100%;">清除数据</button>
+  </div>
+</aside>
+
+<div class="content">
+<header>
+  <div class="year-box">
+    <label>当前年份</label>
+    <input type="number" id="yearInput" value="2026">
+    <button class="btn btn-ghost btn-sm" id="setYearBtn">确定</button>
+  </div>
+  <div class="path-input">
+    <input type="text" id="registerPath" placeholder="报名表路径（点「浏览」自动选择，或粘贴完整路径）">
+    <button class="btn btn-ghost" id="browseBtn">浏览…</button>
+  </div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索姓名 / 学号…">
+    <button class="btn btn-ghost btn-sm" id="searchClear" title="清空搜索">×</button>
+  </div>
+  <div style="flex:1"></div>
+</header>
+
+<div class="modal-mask hidden" id="browseModal">
+  <div class="modal">
+    <h3>选择报名表</h3>
+    <p style="color:var(--text-sub);font-size:12px;margin-bottom:8px;">
+      以下是从 data 目录和「下载」文件夹自动发现的 Excel 文件（按时间倒序）：
+    </p>
+    <div id="browseList" style="max-height:320px;overflow-y:auto;"></div>
+    <p style="color:var(--text-sub);font-size:12px;margin-top:8px;">
+      没找到？请把报名表文件放到程序目录下的 <b>data</b> 文件夹里，再点「重新扫描」。
+    </p>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" id="browseRescan">重新扫描</button>
+      <button class="btn btn-ghost" id="browseCancel">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="main single">
+  <div class="col" id="leftCol">
+    <div class="col-head">
+      <h2>待确认（可能获奖）</h2>
+      <span class="count" id="leftCount2">0</span>
+    </div>
+    <div class="col-body" id="leftBody">
+      <div class="empty">加载并筛选后，这里显示待确认的选手</div>
+    </div>
+  </div>
+  <div class="col" id="rightCol" style="display:none;">
+    <div class="col-head">
+      <h2>已通过 / 已确认</h2>
+      <span class="count" id="rightCount2">0</span>
+    </div>
+    <div class="col-body col-body-cols" id="rightBody">
+      <div class="empty">确认通过的选手显示在这里</div>
+    </div>
+  </div>
+  <div class="col" id="draftCol" style="display:none;">
+    <div class="col-head">
+      <h2>草稿箱（已取消）</h2>
+      <span class="count" id="draftCount2">0</span>
+    </div>
+    <div class="col-body" id="draftBody">
+      <div class="empty">被取消报名资格的选手显示在这里</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="modal-mask hidden" id="rejectModal">
+  <div class="modal">
+    <h3>取消报名资格</h3>
+    <p>确定要取消 <b id="rejectName"></b> 的报名资格吗？<br>该操作会将此人移出“报名成功”名单。</p>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" id="rejectCancel">再想想</button>
+      <button class="btn btn-danger" id="rejectConfirm">确认取消资格</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask hidden" id="groupConfirmModal">
+  <div class="modal">
+    <h3>确认报名资格</h3>
+    <p>该选手报名了 <b id="groupConfirmName"></b>，报名的组别如下：</p>
+    <div id="groupConfirmList" style="margin:12px 0;"></div>
+    <p style="color:var(--text-sub);font-size:13px;">请选择是否<b>全部组别通过</b>，或只通过其中某几个组别：</p>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn btn-ghost" id="groupConfirmCancel">取消</button>
+      <button class="btn btn-ghost" id="groupConfirmPartial">仅通过所选组别</button>
+      <button class="btn btn-success" id="groupConfirmAll">全部通过</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask hidden" id="detailModal">
+  <div class="modal detail-modal">
+    <div class="detail-head">
+      <div>
+        <h3 id="detailTitle">获奖详情</h3>
+        <div class="meta" id="detailMeta"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="detailClose">关闭</button>
+    </div>
+    <div id="detailBody" style="max-height:60vh;overflow-y:auto;">
+      <div class="loading">加载中…</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let state = { left: [], right: [], rejected: [] };
+let selectedKey = null;
+let pendingRejectKey = null;
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+async function api(path, body) {
+  const opt = { method: body ? 'POST' : 'GET', headers: {} };
+  if (body) {
+    opt.headers['Content-Type'] = 'application/json';
+    opt.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, opt);
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    throw new Error(data.error || '请求失败');
+  }
+  return data;
+}
+
+function renderPerson(p, side) {
+  const el = document.createElement('div');
+  el.className = 'person-card' + (selectedKey === p.key ? ' selected' : '');
+  el.dataset.key = p.key;
+
+  // 组别、校区、疑似获奖标记
+  const groupTags = (p.groups || []).length
+    ? (p.groups || []).map(g => `<span class="tag tag-group">${g}</span>`).join('')
+    : '';
+  const campusTag = p.campus
+    ? `<span class="tag tag-campus">${p.campus}</span>` : '';
+  const suspectTag = (p.suspect || p.matched)
+    ? '<span class="tag tag-suspect">疑似获奖</span>' : '';
+
+  let actions = '';
+  let actionsInline = '';
+  if (side === 'left') {
+    // 待确认栏：按钮放名字右边，卡片更紧凑
+    actionsInline = `
+      <span class="name-actions">
+        <button class="btn btn-success btn-sm" data-act="confirm">确认报名成功</button>
+        <button class="btn btn-danger btn-sm" data-act="reject">取消报名资格</button>
+      </span>`;
+  } else if (side === 'right') {
+    if (p.status === 'confirmed') {
+      actions = `<div class="actions">
+        <button class="btn btn-ghost btn-sm" data-act="undo">撤销确认</button>
+        <button class="btn btn-danger btn-sm" data-act="reject">取消报名资格</button>
+      </div>`;
+    } else {
+      actions = `<div class="actions">
+        <span style="color:var(--text-sub);font-size:12px;">自动通过（非疑似获奖）</span>
+        <button class="btn btn-danger btn-sm" data-act="reject">取消报名资格</button>
+      </div>`;
+    }
+  } else if (side === 'draft') {
+    // 草稿箱：撤销恢复 + 永久取消
+    actionsInline = `
+      <span class="name-actions">
+        <button class="btn btn-success btn-sm" data-act="restore">撤销恢复</button>
+      </span>`;
+  }
+
+  el.innerHTML = `
+    <div class="name-row"><span class="name">${p.name}</span>${groupTags}${campusTag}${suspectTag}${actionsInline}</div>
+    ${actions}
+  `;
+
+  // 点击卡片进入详情界面（展示完整信息）
+  el.addEventListener('click', (e) => {
+    if (e.target.dataset.act) return; // 点按钮不触发
+    selectedKey = p.key;
+    openDetail(p.key, p.name);
+  });
+
+  // 按钮事件
+  el.querySelectorAll('button[data-act]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const act = btn.dataset.act;
+      if (act === 'reject') {
+        pendingRejectKey = p.key;
+        $('rejectName').textContent = p.name;
+        $('rejectModal').classList.remove('hidden');
+        return;
+      }
+      if (act === 'detail') {
+        openDetail(p.key, p.name);
+        return;
+      }
+      if (act === 'confirm') {
+        // 双组别（>1 个组别）时询问是否全部通过
+        if ((p.groups || []).length > 1) {
+          openGroupConfirm(p);
+          return;
+        }
+        await doAction(p.key, 'confirm', { groups: p.groups || [] });
+        return;
+      }
+      if (act === 'restore') {
+        await doAction(p.key, 'restore');
+        return;
+      }
+      await doAction(p.key, act);
+    });
+  });
+
+  return el;
+}
+
+// ---- 二级详情面板 ----
+function awardClass(award) {
+  if (!award) return 'award-other';
+  if (award.includes('国际金牌')) return 'award-intl';
+  if (award.includes('国际')) return 'award-intl';
+  if (award === '金牌') return 'award-gold';
+  if (award === '银牌') return 'award-silver';
+  if (award === '铜牌') return 'award-bronze';
+  if (award === '一等奖') return 'award-first';
+  return 'award-other';
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// 由初中入学年份 + 比赛学年推算"当时读几年级"
+// 学年 = fall_semester ? 比赛年份 : 比赛年份 - 1
+// 初中入学年份 E，则第 (学年 - E + 1) 年为初一，依次为初二/初三/高一/高二/高三/大一...
+function stageLabel(schoolYear, enrollMiddle) {
+  if (enrollMiddle == null || schoolYear == null) return '';
+  const n = schoolYear - enrollMiddle + 1; // 第 n 个学年
+  if (n < 1) return '小学/未入学';
+  if (n <= 3) return `初${['一','二','三'][n-1]}`;
+  if (n <= 6) return `高${['一','二','三'][n-4]}`;
+  if (n <= 10) return `大${['一','二','三','四'][n-7] || '四'}`;
+  return `大${n-6}+`;
+}
+
+function renderDetail(data) {
+  const body = $('detailBody');
+
+  // 顶部：报名人完整信息卡片
+  const infoRows = [
+    ['学号', data.student_id],
+    ['花名', data.nickname],
+    ['一卡通', data.card_id],
+    ['手机', data.phone],
+    ['QQ', data.qq],
+    ['年级', data.grade_name],
+    ['组别', (data.groups || []).join('、')],
+    ['校区', data.campus],
+  ].filter(([, v]) => v != null && String(v).trim() !== '');
+  const infoCard = `<div class="detail-info-card">
+    <div class="detail-info-name">${esc(data.name || '')}</div>
+    <div class="detail-info-grid">
+      ${infoRows.map(([k, v]) => `<div class="info-item"><span class="info-label">${k}</span><span class="info-value">${esc(v)}</span></div>`).join('')}
+    </div>
+  </div>`;
+
+  if (!data || data.matched === false || !data.entries || data.entries.length === 0) {
+    body.innerHTML = infoCard + '<div class="detail-empty">该人在 OIerDb 获奖数据库中未找到记录</div>';
+    return;
+  }
+
+  const actualYear = data.grade_year;
+  let html = infoCard;
+
+  // 顶部提示：报名年级
+  if (actualYear) {
+    html += `<div class="detail-warn">
+      该报名人年级为 <b>${esc(data.grade_name || '')}（${actualYear} 级）</b>，即 ${actualYear} 年大学入学。
+      下方列出 OIerDb 中所有同名者的完整获奖轨迹，请核对<b>哪一个才是本人</b>。
+    </div>`;
+  }
+
+  const matchedEntries = data.entries.filter(e => e.is_match);
+  const otherEntries = data.entries.filter(e => !e.is_match);
+
+  function renderEntry(entry) {
+    const records = entry.records || [];
+    // 每条记录推算学段
+    const recRows = records.map((r) => {
+      const schoolYear = r.fall_semester ? (r.year || 0) : (r.year || 0) - 1;
+      const stage = stageLabel(schoolYear, entry.grade);
+      return { ...r, stage };
+    });
+
+    // 生成轨迹总结：初中X年入学 → 高中X年 → 大学X年
+    const em = entry.grade;
+    const uy = entry.univ_year;
+    let summary = '';
+    if (em != null && uy != null) {
+      const hs = em + 3; // 高中入学年份
+      summary = `初中 ${em} 年入学 · 高中 ${hs} 年入学 · 大学 ${uy} 年入学`;
+    }
+    // 最近一次获奖（记录已按年份倒序）
+    let latest = '';
+    if (recRows.length > 0) {
+      const r = recRows[0];
+      latest = `最近获奖：${r.year ?? '—'} 年 ${r.contest_name || '—'} ${r.award || '—'}（当时${r.stage || '—'}）`;
+    }
+
+    const badge = entry.is_match
+      ? '<span class="award-badge award-first" style="margin-left:8px;">可能本人</span>'
+      : '<span class="award-badge award-other" style="margin-left:8px;">同名非本人</span>';
+
+    // 逐条生成表格行
+    let tbody = '';
+    if (recRows.length === 0) {
+      tbody = '<tr><td colspan="6" style="color:var(--text-sub);text-align:center;">无获奖记录</td></tr>';
+    } else {
+      recRows.forEach((r) => {
+        const stageCls = /^高/.test(r.stage || '') ? 'style="font-weight:600;color:#c77a00;"' : '';
+        tbody += `<tr>
+          <td class="contest-name">${esc(r.contest_name || '—')}</td>
+          <td class="rec-year">${r.year ?? '—'}</td>
+          <td ${stageCls}>${esc(r.stage || '—')}</td>
+          <td><span class="award-badge ${awardClass(r.award)}">${esc(r.award || '—')}</span></td>
+          <td>${r.rank ?? '—'}</td>
+          <td>${esc(r.score || '—')}</td>
+        </tr>`;
+      });
+    }
+
+    // 返回一段完整的同名者卡片 HTML
+    return `<div class="detail-person" style="${entry.is_match ? 'border-color:var(--primary);' : ''}">
+      <div class="detail-person-head">
+        <div>
+          <span style="font-weight:600;">${esc(data.name)}</span>
+          ${badge}
+          <div class="uid">${esc(summary)}${entry.uid ? ' · UID ' + esc(entry.uid) : ''}</div>
+          ${latest ? `<div class="uid" style="color:var(--text);">${esc(latest)}</div>` : ''}
+        </div>
+        <a class="detail-link" href="${esc(entry.url)}" target="_blank" rel="noopener">
+          在 OIerDb 官网查看 ↗
+        </a>
+      </div>
+      <table class="rec-table">
+        <thead><tr>
+          <th>比赛</th><th>年份</th><th>当时年级</th><th>奖项</th><th>排名</th><th>分数</th>
+        </tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    </div>`;
+  }
+
+  // 可能本人优先展示，同名非本人跟在后面
+  matchedEntries.forEach(e => { html += renderEntry(e); });
+  otherEntries.forEach(e => { html += renderEntry(e); });
+
+  body.innerHTML = html;
+}
+
+async function openDetail(key, name) {
+  $('detailModal').classList.remove('hidden');
+  $('detailTitle').textContent = `选手详情 · ${name}`;
+  $('detailMeta').textContent = '正在查询…';
+  $('detailBody').innerHTML = '<div class="loading">加载中…</div>';
+  try {
+    const data = await api(`/api/person_detail?key=${encodeURIComponent(key)}&name=${encodeURIComponent(name)}`);
+    $('detailMeta').textContent = '';
+    renderDetail(data);
+  } catch (e) {
+    $('detailBody').innerHTML = '<div class="detail-empty">查询失败：' + esc(e.message) + '</div>';
+  }
+}
+
+$('detailClose').addEventListener('click', () => {
+  $('detailModal').classList.add('hidden');
+});
+$('detailModal').addEventListener('click', (e) => {
+  if (e.target === $('detailModal')) $('detailModal').classList.add('hidden');
+});
+
+let searchKeyword = '';  // 当前搜索关键词
+
+function matchSearch(p) {
+  if (!searchKeyword) return true;
+  const kw = searchKeyword.trim().toLowerCase();
+  if (!kw) return true;
+  const fields = [p.name, p.student_id, p.nickname, p.card_id, p.qq, p.phone]
+    .filter(v => v != null).join(' ').toLowerCase();
+  return fields.includes(kw);
+}
+
+// 已通过栏的自动分类：返回该人所属的分类列表（可能多个，双选者多分类都显示）
+function classifyPerson(p) {
+  const groups = p.groups || [];
+  const isPro = groups.includes('专业组');
+  const isNewcomer = groups.includes('大一组') || groups.includes('大二组');
+  const campus = (p.campus || '').includes('九龙湖') ? '九龙湖' : '四牌楼';
+  const result = [];
+  if (isPro) result.push(campus + ' · 专业组');
+  if (isNewcomer) result.push(campus + ' · 大一大二组');
+  if (result.length === 0) result.push(campus + ' · 其他');
+  return result;
+}
+
+// 分类展示顺序
+const CLASS_ORDER = [
+  '四牌楼 · 大一大二组',
+  '四牌楼 · 专业组',
+  '九龙湖 · 大一大二组',
+  '九龙湖 · 专业组',
+];
+
+function render() {
+  const leftBody = $('leftBody');
+  const rightBody = $('rightBody');
+  leftBody.innerHTML = '';
+  rightBody.innerHTML = '';
+
+  const leftList = state.left.filter(matchSearch);
+  const rightList = state.right.filter(matchSearch);
+
+  if (leftList.length === 0) {
+    leftBody.innerHTML = searchKeyword
+      ? '<div class="empty">待确认栏无匹配「' + searchKeyword + '」</div>'
+      : '<div class="empty">没有待确认的选手</div>';
+  } else {
+    leftList.forEach(p => leftBody.appendChild(renderPerson(p, 'left')));
+  }
+
+  // 右侧"已通过"栏：按 4 类分组展示
+  if (rightList.length === 0) {
+    rightBody.innerHTML = searchKeyword
+      ? '<div class="empty">已通过栏无匹配「' + searchKeyword + '」</div>'
+      : '<div class="empty">还没有通过的人</div>';
+  } else {
+    // 分组：双选者可能同时属于多个分类
+    const groups = {};
+    rightList.forEach(p => {
+      classifyPerson(p).forEach(cls => {
+        (groups[cls] = groups[cls] || []).push(p);
+      });
+    });
+    // 按固定顺序渲染，缺失的分类也显示（空则提示）
+    CLASS_ORDER.forEach(cls => {
+      const members = groups[cls] || [];
+      const groupEl = document.createElement('div');
+      groupEl.className = 'group-block';
+      groupEl.innerHTML = `<div class="group-head">
+        <span class="group-title">${cls}</span>
+        <span class="group-count">${members.length} 人</span>
+      </div>`;
+      const body = document.createElement('div');
+      body.className = 'group-body';
+      if (members.length === 0) {
+        body.innerHTML = '<div class="group-empty">（无）</div>';
+      } else {
+        members.forEach(p => body.appendChild(renderPerson(p, 'right')));
+      }
+      groupEl.appendChild(body);
+      rightBody.appendChild(groupEl);
+    });
+    // 兜底：出现未在 CLASS_ORDER 中的分类（如"其他"）也渲染
+    Object.keys(groups).forEach(cls => {
+      if (CLASS_ORDER.includes(cls)) return;
+      const members = groups[cls];
+      const groupEl = document.createElement('div');
+      groupEl.className = 'group-block';
+      groupEl.innerHTML = `<div class="group-head">
+        <span class="group-title">${cls}</span>
+        <span class="group-count">${members.length} 人</span>
+      </div>`;
+      const body = document.createElement('div');
+      body.className = 'group-body';
+      members.forEach(p => body.appendChild(renderPerson(p, 'right')));
+      groupEl.appendChild(body);
+      rightBody.appendChild(groupEl);
+    });
+  }
+
+  // 草稿箱栏：展示被取消资格的选手
+  const draftBody = $('draftBody');
+  draftBody.innerHTML = '';
+  const draftList = state.rejected.filter(matchSearch);
+  if (draftList.length === 0) {
+    draftBody.innerHTML = searchKeyword
+      ? '<div class="empty">草稿箱无匹配「' + searchKeyword + '」</div>'
+      : '<div class="empty">暂无被取消的选手</div>';
+  } else {
+    draftList.forEach(p => draftBody.appendChild(renderPerson(p, 'draft')));
+  }
+
+  $('leftCount').textContent = state.left.length;
+  $('rightCount').textContent = state.right.length;
+  $('draftCount').textContent = state.rejected.length;
+  $('leftCount2').textContent = state.left.length;
+  $('rightCount2').textContent = state.right.length;
+  $('draftCount2').textContent = state.rejected.length;
+  $('exportBtn').disabled = state.right.length === 0;
+}
+
+async function refreshPeople() {
+  const data = await api('/api/people');
+  state = data;
+  render();
+  await refreshConfig();
+}
+
+async function refreshConfig() {
+  const c = await api('/api/config');
+  $('yearInput').value = c.year;
+  $('registerPath').value = c.register_path || '';
+  // 更新操作按钮可用状态
+  const s1 = c.register_loaded, s2 = c.oierdb_loaded;
+  $('fetchBtn').disabled = !s1;
+  $('matchBtn').disabled = !(s1 && s2);
+}
+
+async function doAction(key, action, extra = {}) {
+  try {
+    await api('/api/action', { key, action, ...extra });
+    const msgs = {
+      confirm: '已确认报名成功',
+      undo: '已撤销',
+      reject: '已取消资格（移入草稿箱）',
+      restore: '已从草稿箱恢复',
+    };
+    toast(msgs[action] || '操作成功');
+    await refreshPeople();
+  } catch (e) {
+    toast('操作失败：' + e.message);
+  }
+}
+
+// ---- 双组别确认弹窗 ----
+let groupConfirmPerson = null;
+function openGroupConfirm(p) {
+  groupConfirmPerson = p;
+  $('groupConfirmName').textContent = p.name;
+  const list = $('groupConfirmList');
+  const groups = p.groups || [];
+  list.innerHTML = groups.map(g => `
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;cursor:pointer;">
+      <input type="checkbox" class="group-check" value="${esc(g)}" checked>
+      <span>${esc(g)}</span>
+    </label>`).join('');
+  $('groupConfirmModal').classList.remove('hidden');
+}
+
+function closeGroupConfirm() {
+  $('groupConfirmModal').classList.add('hidden');
+  groupConfirmPerson = null;
+}
+
+$('groupConfirmCancel').addEventListener('click', closeGroupConfirm);
+$('groupConfirmModal').addEventListener('click', (e) => {
+  if (e.target === $('groupConfirmModal')) closeGroupConfirm();
+});
+
+// 全部通过
+$('groupConfirmAll').addEventListener('click', async () => {
+  if (!groupConfirmPerson) return;
+  const p = groupConfirmPerson;
+  closeGroupConfirm();
+  await doAction(p.key, 'confirm', { groups: p.groups || [] });
+});
+
+// 仅通过所选组别
+$('groupConfirmPartial').addEventListener('click', async () => {
+  if (!groupConfirmPerson) return;
+  const p = groupConfirmPerson;
+  const checked = [...document.querySelectorAll('#groupConfirmList .group-check:checked')]
+    .map(c => c.value);
+  closeGroupConfirm();
+  if (checked.length === 0) {
+    toast('请至少勾选一个组别');
+    return;
+  }
+  await doAction(p.key, 'confirm', { groups: checked });
+});
+
+// ---- 侧边菜单切换 ----
+const menuItems = document.querySelectorAll('.menu-item[data-view]');
+menuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    menuItems.forEach(m => m.classList.remove('active'));
+    item.classList.add('active');
+    const view = item.dataset.view;
+    const leftCol = $('leftCol');
+    const rightCol = $('rightCol');
+    const draftCol = $('draftCol');
+    if (view === 'pending') {
+      leftCol.style.display = '';
+      rightCol.style.display = 'none';
+      draftCol.style.display = 'none';
+    } else if (view === 'passed') {
+      leftCol.style.display = 'none';
+      rightCol.style.display = '';
+      draftCol.style.display = 'none';
+    } else if (view === 'draft') {
+      leftCol.style.display = 'none';
+      rightCol.style.display = 'none';
+      draftCol.style.display = '';
+    }
+  });
+});
+
+// ---- 搜索 ----
+$('searchInput').addEventListener('input', () => {
+  searchKeyword = $('searchInput').value.trim();
+  render();
+});
+
+$('searchClear').addEventListener('click', () => {
+  $('searchInput').value = '';
+  searchKeyword = '';
+  render();
+});
+
+// ---- 回退上一次操作 ----
+$('undoBtn').addEventListener('click', async () => {
+  try {
+    await api('/api/undo', {});
+    toast('已回退上一次操作');
+    await refreshPeople();
+  } catch (e) {
+    toast('回退失败：' + e.message);
+  }
+});
+
+// ---- 清除数据 ----
+$('resetBtn').addEventListener('click', async () => {
+  if (!confirm('确定要清除当前所有数据吗？\n\n将清空报名表、筛选结果和人工确认状态，以便处理下一份 Excel。\n（OIerDb 获奖数据会保留，无需重新爬取）')) {
+    return;
+  }
+  try {
+    await api('/api/reset', {});
+    state = { left: [], right: [], rejected: [] };
+    searchKeyword = '';
+    $('searchInput').value = '';
+    render();
+    await refreshConfig();
+    toast('数据已清除，可加载新的报名表');
+  } catch (e) {
+    toast('清除失败：' + e.message);
+  }
+});
+
+// ---- 事件绑定 ----
+$('setYearBtn').addEventListener('click', async () => {
+  const year = parseInt($('yearInput').value, 10);
+  if (!year) { toast('请输入有效年份'); return; }
+  try {
+    await api('/api/set_year', { year });
+    toast('年份已设为 ' + year);
+  } catch (e) { toast(e.message); }
+});
+
+$('loadBtn').addEventListener('click', async () => {
+  const path = $('registerPath').value.trim();
+  if (!path) { toast('请输入报名表路径'); return; }
+  $('loadBtn').disabled = true;
+  $('loadBtn').textContent = '加载中…';
+  try {
+    const r = await api('/api/load_register', { path });
+    toast(`成功识别 ${r.count} 名报名人`);
+    await refreshConfig();
+  } catch (e) {
+    toast('加载失败：' + e.message);
+  } finally {
+    $('loadBtn').disabled = false;
+    $('loadBtn').textContent = '加载报名表';
+  }
+});
+
+$('fetchBtn').addEventListener('click', async () => {
+  $('fetchBtn').disabled = true;
+  $('fetchBtn').textContent = '爬取中（可能较慢）…';
+  try {
+    const r = await api('/api/fetch_oierdb', { force: false });
+    toast(`爬取成功：${r.total} 条记录，${r.names} 个姓名`);
+    await refreshConfig();
+  } catch (e) {
+    toast('爬取失败：' + e.message);
+  } finally {
+    $('fetchBtn').textContent = '爬取 OIerDb 数据';
+    await refreshConfig();
+  }
+});
+
+$('matchBtn').addEventListener('click', async () => {
+  $('matchBtn').disabled = true;
+  try {
+    const r = await api('/api/run_match', {});
+    toast(`筛选完成：共 ${r.total} 人，待确认 ${r.pending} 人`);
+    await refreshPeople();
+  } catch (e) {
+    toast('筛选失败：' + e.message);
+  } finally {
+    await refreshConfig();
+  }
+});
+
+$('exportBtn').addEventListener('click', async () => {
+  try {
+    const r = await api('/api/export', {});
+    const lines = r.groups.map(g => `${g.label}：${g.count} 人`);
+    toast('导出成功！' + lines.join('；'));
+    // 弹窗展示
+    alert('导出成功，文件已保存到 output 目录：\n\n' + lines.join('\n'));
+  } catch (e) {
+    toast('导出失败：' + e.message);
+  }
+});
+
+$('rejectCancel').addEventListener('click', () => {
+  $('rejectModal').classList.add('hidden');
+  pendingRejectKey = null;
+});
+$('rejectConfirm').addEventListener('click', async () => {
+  $('rejectModal').classList.add('hidden');
+  if (pendingRejectKey) {
+    await doAction(pendingRejectKey, 'reject');
+    pendingRejectKey = null;
+  }
+});
+
+// 支持拖拽/粘贴路径（拖拽只能拿到文件名，需配合 data 目录或后端解析）
+$('registerPath').addEventListener('dragover', (e) => e.preventDefault());
+$('registerPath').addEventListener('drop', (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    $('registerPath').value = file.name;
+    toast('已填入文件名，请确保该文件在 data 目录或「下载」文件夹中');
+  }
+});
+
+// 浏览按钮：列出可选的报名表文件
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+async function openBrowse() {
+  $('browseModal').classList.remove('hidden');
+  await scanFiles();
+}
+
+async function scanFiles() {
+  const listEl = $('browseList');
+  listEl.innerHTML = '<div class="loading">扫描中…</div>';
+  try {
+    const r = await api('/api/list_files');
+    const files = r.files || [];
+    if (files.length === 0) {
+      listEl.innerHTML = '<div class="empty">未发现 Excel 文件<br>请把报名表放到程序目录下的 data 文件夹</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    files.forEach(f => {
+      const el = document.createElement('div');
+      el.className = 'person-card';
+      el.style.cursor = 'pointer';
+      const d = new Date(f.mtime * 1000);
+      const timeStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      el.innerHTML = `
+        <div class="name-row"><span class="name">${f.name}</span></div>
+        <div class="info">${fmtSize(f.size)} · ${timeStr}<br><span style="font-size:11px;">${f.path}</span></div>
+      `;
+      el.addEventListener('click', () => {
+        $('registerPath').value = f.path;
+        $('browseModal').classList.add('hidden');
+        toast('已选择：' + f.name);
+      });
+      listEl.appendChild(el);
+    });
+  } catch (e) {
+    listEl.innerHTML = '<div class="empty">扫描失败：' + e.message + '</div>';
+  }
+}
+
+$('browseBtn').addEventListener('click', openBrowse);
+$('browseRescan').addEventListener('click', scanFiles);
+$('browseCancel').addEventListener('click', () => {
+  $('browseModal').classList.add('hidden');
+});
+
+// 初始化
+refreshConfig();
+refreshPeople();
+</script>
+</body>
+</html>

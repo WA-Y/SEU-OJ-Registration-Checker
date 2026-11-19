@@ -1,0 +1,35 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+develop-eggs/
+dist/
+wheels/
+*.egg
+
+# ---- 虚拟环境 ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- IDE / 编辑器 ----
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ---- 运行时数据（自动生成，勿提交）----
+data/
+output/
+
+# ---- 打包产物 ----
+*.exe
+*.spec
+*.bat
+# 根目录下的应用图标（打包用），保留 web/ 下的 favicon.ico
+/app_icon.ico
